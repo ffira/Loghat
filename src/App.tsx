@@ -2089,7 +2089,8 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
     if (!isPushBannerVisible) return null;
     return (
       <div 
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-card/95 border border-gold/25 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-2xl p-3.5 flex items-start gap-3 z-[1000] animate-slideDown select-none cursor-pointer"
+        className="fixed left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-card/95 border border-gold/25 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-2xl p-3.5 flex items-start gap-3 z-[1000] animate-slideDown select-none cursor-pointer"
+        style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}
         onClick={() => {
           setIsPushBannerVisible(false);
           if (pushNotification.title.includes('Referral') || pushNotification.title.includes('Ganjaran')) {
@@ -2259,7 +2260,7 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
       
       {/* Dynamic Announcement toast for Web fallback or general alert */}
       {toastMessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+        <div className="fixed left-1/2 transform -translate-x-1/2 z-50 animate-bounce" style={{ top: 'calc(1.25rem + env(safe-area-inset-top))' }}>
           <div className={`px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 border text-xs md:text-sm font-bold ${
             toastType === 'success' 
               ? 'bg-emerald-950 border-emerald-500 text-emerald-300' 
@@ -2276,7 +2277,7 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
       {/* ------------------------------------------------------------- */}
       <div className="flex md:hidden flex-col min-h-screen text-[#F5F5F5] select-none text-left relative bg-[#06080c] pb-[64px]">
         {/* Slimmed iOS App Header */}
-        <header className="px-4 pt-4 pb-2.5 border-b border-white/5 bg-card/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between shrink-0">
+        <header className="px-4 pb-2.5 border-b border-white/5 bg-card/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between shrink-0" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-1.5">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
               <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[5px]" />
