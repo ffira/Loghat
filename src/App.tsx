@@ -76,6 +76,10 @@ export default function App() {
   const [optInTelemetry, setOptInTelemetry] = useState<boolean>(() => {
     return localStorage.getItem('loghat_opt_in_telemetry') !== 'false'; // default true
   });
+  // Controlled state for the "I agree to Terms" consent checkbox. The consent gate
+  // is rendered in both the mobile and desktop layouts simultaneously, so reading the
+  // checkbox via document.getElementById (duplicate IDs) returned the wrong instance.
+  const [agreeToTerms, setAgreeToTerms] = useState<boolean>(isPrivacyConsented);
   const [userProfile, setUserProfile] = useState<{
     email: string | null;
     phone: string | null;
@@ -1171,10 +1175,10 @@ export default function App() {
               <div className="grid grid-cols-[auto_1fr] items-start gap-2.5 cursor-pointer min-w-0 whitespace-normal break-words">
                 <input
                   type="checkbox"
-                  id="agree-to-rules"
-                  defaultChecked={isPrivacyConsented}
+                  checked={agreeToTerms}
                   className="mt-0.5 w-4 h-4 rounded border-white/25 accent-crimson cursor-pointer shrink-0 col-start-1 row-span-2"
-                  onChange={() => {
+                  onChange={(e) => {
+                    setAgreeToTerms(e.target.checked);
                     if (isIosSoundActive) playIosTap();
                   }}
                 />
@@ -1194,10 +1198,10 @@ export default function App() {
               <div className="grid grid-cols-[auto_1fr] items-start gap-2.5 cursor-pointer min-w-0 border-t border-white/5 pt-3.5 whitespace-normal break-words">
                 <input
                   type="checkbox"
-                  id="agree-to-telemetry"
+                  checked={optInTelemetry}
                   className="mt-0.5 w-4 h-4 rounded border-white/25 accent-emerald-500 cursor-pointer shrink-0 col-start-1 row-span-2"
-                  defaultChecked={optInTelemetry}
-                  onChange={() => {
+                  onChange={(e) => {
+                    setOptInTelemetry(e.target.checked);
                     if (isIosSoundActive) playIosTap();
                   }}
                 />
@@ -1220,16 +1224,13 @@ export default function App() {
         <div className="pt-2 flex flex-col gap-2">
           <button
             onClick={() => {
-              const termsChecked = (document.getElementById('agree-to-rules') as HTMLInputElement)?.checked;
-              const telemetryChecked = (document.getElementById('agree-to-telemetry') as HTMLInputElement)?.checked;
-              
-              if (!termsChecked) {
+              if (!agreeToTerms) {
                 if (isIosSoundActive) playIosError();
                 alert("Consensus Needed:\nYou must explicitly check the 'I agree' checkbox before proceeding to the Loghat App.");
                 return;
               }
 
-              handleAcceptPrivacyAndConsent(!!telemetryChecked);
+              handleAcceptPrivacyAndConsent(optInTelemetry);
             }}
             className={`w-full text-center bg-crimson hover:bg-crimson/95 text-white font-sans font-black rounded-xl shadow-lg transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 ${
               isSimulatorLayout ? 'px-3 py-2 text-[10px]' : 'px-4 py-3 text-xs'
