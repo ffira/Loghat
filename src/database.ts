@@ -90,6 +90,7 @@ export interface DBUser {
   password_hash: string | null;
   apple_id: string | null;
   google_id: string | null;
+  phone: string | null;
   nickname: string;
   origin_state: string;
   heritage_state: string;
@@ -159,6 +160,7 @@ export async function initializeDbSchema() {
           password_hash TEXT,
           apple_id TEXT UNIQUE,
           google_id TEXT UNIQUE,
+          phone TEXT,
           nickname TEXT,
           origin_state TEXT,
           heritage_state TEXT,
@@ -177,6 +179,10 @@ export async function initializeDbSchema() {
       // Migration: Add referral_code column if missing in existing database
       try {
         await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE;`);
+      } catch (e) {}
+
+      try {
+        await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;`);
       } catch (e) {}
 
       // 2. Transactions table
@@ -317,17 +323,18 @@ export async function createUser(user: DBUser): Promise<DBUser> {
   if (isPostgresActive && pgPool) {
     await pgPool.query(
       `INSERT INTO users (
-        id, email, password_hash, apple_id, google_id, nickname, 
+        id, email, password_hash, apple_id, google_id, phone, nickname, 
         origin_state, heritage_state, premium_tier, best_score, 
         best_rank, balance, email_verified, phone_verified, 
         location_permission, unlocked_badge_ids, referral_code
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
       [
         user.id,
         user.email ? user.email.toLowerCase() : null,
         user.password_hash,
         user.apple_id,
         user.google_id,
+        user.phone,
         user.nickname,
         user.origin_state,
         user.heritage_state,

@@ -347,7 +347,9 @@ export default function App() {
         bestScore: updatedFields.bestScore ?? userProfile.bestScore,
         bestRank: updatedFields.bestRank ?? userProfile.bestRank,
         unlockedBadgeIds: getUnlockedBadgeIds(),
-        referralCode: updatedFields.referralCode ?? userProfile.referralCode
+        referralCode: updatedFields.referralCode ?? userProfile.referralCode,
+        phone: updatedFields.phone ?? userProfile.phone,
+        phoneVerified: updatedFields.phoneVerified ?? userProfile.phoneVerified
       };
 
       await fetch(`${API_BASE}/api/users/sync`, {
@@ -499,7 +501,7 @@ export default function App() {
   const handleVerifyPhoneCode = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (phoneOtpInput.trim() === '8153') {
-      triggerToast('🎉 Phone verified and status: complete in Firestore!', 'success');
+      triggerToast('🎉 Phone number verified and saved to your profile!', 'success');
       updateProfile({
         phone: `${countryCode}${phoneInput}`,
         phoneVerified: true
@@ -1643,57 +1645,37 @@ export default function App() {
 
   // Unified gatekeeper router for game screen
   const renderGameTabContent = (isSimulatorLayout: boolean) => {
-    if (!isPrivacyConsented) {
-      return renderPrivacyConsentScreen(isSimulatorLayout);
-    }
-
     const isProfileVerified = userProfile.emailVerified && userProfile.phoneVerified && userProfile.locationPermission === 'granted';
 
     // If profile is NOT verified AND they have completed the 1st quiz (or are forced into onboarding), show onboarding wizard.
     if (!isProfileVerified && (firstQuizCompleted || forcedOnboarding)) {
       return (
         <div className="space-y-4">
-          <div className="bg-[#12141c]/90 border border-crimson/30 rounded-xl p-3.5 text-center text-xs space-y-1">
-            <span className="text-crimson font-black uppercase tracking-wider text-[10px] block">🔒 Verification Required</span>
-            <p className="text-white/70">
-              {appLanguage === 'bm' 
-                ? 'Sila lengkapkan pengesahan profil untuk menyimpan markah anda dan membuka lebih banyak kuiz!'
-                : 'Please complete your profile verification to save your score and unlock more quizzes!'}
-            </p>
-          </div>
-          {renderMultiStepOnboarding(isSimulatorLayout)}
+          {/* Show privacy consent at the top of onboarding if not yet accepted */}
+          {!isPrivacyConsented && renderPrivacyConsentScreen(isSimulatorLayout)}
+
+          {isPrivacyConsented && (
+            <>
+              <div className="bg-[#12141c]/90 border border-crimson/30 rounded-xl p-3.5 text-center text-xs space-y-1">
+                <span className="text-crimson font-black uppercase tracking-wider text-[10px] block">🔒 Verification Required</span>
+                <p className="text-white/70">
+                  {appLanguage === 'bm' 
+                    ? 'Sila lengkapkan pengesahan profil untuk menyimpan markah anda dan membuka lebih banyak kuiz!'
+                    : 'Please complete your profile verification to save your score and unlock more quizzes!'}
+                </p>
+              </div>
+              {renderMultiStepOnboarding(isSimulatorLayout)}
+            </>
+          )}
         </div>
       );
     }
 
-    // User is verified OR they are playing their first free quiz!
+    // User is verified OR they are playing their first free quiz — NO gates, NO banners!
     return (
       <div className="space-y-4 text-left">
         {/* Play-screen Specific Top Ad Banner Placeholder */}
         {!userProfile.isPremiumUser && renderTopAdmobBanner()}
-
-        {/* Guest mode banner if they are not verified */}
-        {!isProfileVerified && (
-          <div className="bg-[#1e1713] border border-gold/25 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs">
-            <div className="space-y-0.5 text-left">
-              <span className="text-[9px] uppercase tracking-wider text-gold font-mono font-black block">Guest Mode — 1st Quiz Free</span>
-              <p className="text-[10px] text-white/70 leading-normal">
-                {appLanguage === 'bm'
-                  ? 'Anda sedang bermain kuiz pertama secara percuma! Log masuk atau sahkan profil untuk menyimpan pencapaian.'
-                  : 'You are playing your first quiz free! Log in or verify your profile to save achievements.'}
-              </p>
-            </div>
-            <button 
-              onClick={() => {
-                setForcedOnboarding(true);
-                if (isIosSoundActive) playIosTap();
-              }}
-              className="bg-gold hover:bg-yellow-400 text-black font-extrabold text-[10px] px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer"
-            >
-              {appLanguage === 'bm' ? 'Log Masuk' : 'Log In'}
-            </button>
-          </div>
-        )}
 
         <DialectIQGame 
           ads={ads} 

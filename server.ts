@@ -312,6 +312,7 @@ app.post('/api/auth/register', async (req: express.Request, res: express.Respons
       password_hash: passwordHash,
       apple_id: null,
       google_id: null,
+      phone: null,
       nickname,
       origin_state: originState || 'Kuala Lumpur',
       heritage_state: 'Other',
@@ -387,6 +388,7 @@ app.post('/api/auth/verify-google', async (req: express.Request, res: express.Re
         password_hash: null,
         apple_id: null,
         google_id: googleId,
+        phone: null,
         nickname: nickname || email.split('@')[0],
         origin_state: 'Kuala Lumpur',
         heritage_state: 'Other',
@@ -436,6 +438,7 @@ app.post('/api/auth/verify-apple', async (req: express.Request, res: express.Res
         password_hash: null,
         apple_id: appleId,
         google_id: null,
+        phone: null,
         nickname: nickname || `AppleUser_${Date.now().toString().slice(-4)}`,
         origin_state: 'Kuala Lumpur',
         heritage_state: 'Other',
@@ -546,7 +549,7 @@ app.get('/api/users/profile', authenticateToken, async (req: any, res: express.R
 });
 
 app.post('/api/users/sync', authenticateToken, async (req: any, res: express.Response) => {
-  const { nickname, originState, premiumTier, bestScore, bestRank, unlockedBadgeIds, referralCode } = req.body;
+  const { nickname, originState, premiumTier, bestScore, bestRank, unlockedBadgeIds, referralCode, phone, phoneVerified } = req.body;
   try {
     const updated = await updateUser(req.user.id, {
       nickname,
@@ -555,7 +558,9 @@ app.post('/api/users/sync', authenticateToken, async (req: any, res: express.Res
       best_score: bestScore,
       best_rank: bestRank,
       unlocked_badge_ids: unlockedBadgeIds ? JSON.stringify(unlockedBadgeIds) : undefined,
-      referral_code: referralCode
+      referral_code: referralCode,
+      phone: phone || undefined,
+      phone_verified: phoneVerified !== undefined ? phoneVerified : undefined
     });
     res.json({ user: updated });
   } catch (err: any) {
