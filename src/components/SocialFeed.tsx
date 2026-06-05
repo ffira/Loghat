@@ -157,14 +157,40 @@ const INITIAL_POSTS: Post[] = [
 ];
 
 export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userProfile, appLanguage = 'manglish' }: SocialFeedProps) {
-  const [posts, setPosts] = useState<Post[]>(() => {
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [loading, setLoading] = useState(false);
+
+  const fetchPosts = async () => {
+    setLoading(true);
     try {
+      const token = localStorage.getItem('loghat_jwt_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const API_BASE = window.location.origin.startsWith('capacitor://')
+        ? 'https://loghatku.my'
+        : '';
+        
+      const res = await fetch(`${API_BASE}/api/social/feed`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data);
+        localStorage.setItem('loghat_social_posts', JSON.stringify(data));
+      }
+    } catch (err) {
+      console.warn('Failed to fetch social feed from server, falling back to local storage', err);
       const stored = localStorage.getItem('loghat_social_posts');
-      return stored ? JSON.parse(stored) : INITIAL_POSTS;
-    } catch {
-      return INITIAL_POSTS;
+      if (stored) setPosts(JSON.parse(stored));
+    } finally {
+      setLoading(false);
     }
-  });
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [userProfile]);
 
   const [newPostText, setNewPostText] = useState('');
   const [postType, setPostType] = useState<'general' | 'challenge'>('general');
@@ -214,26 +240,12 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
     } catch (e) {}
   }, [userProfile]); // refresh if parent updates
 
-  useEffect(() => {
-    localStorage.setItem('loghat_social_posts', JSON.stringify(posts));
-  }, [posts]);
-
   // Track likes count to unlock like badges
-  const handleLikePost = (postId: string) => {
+  const handleLikePost = async (postId: string) => {
+    // Optimistic UI update
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
         const nextLiked = !post.isLikedByUser;
-        
-        // Handle badge unlock for likes
-        if (nextLiked) {
-          const currentLikesCount = parseInt(localStorage.getItem('loghat_stats_feed_likes') || '0', 10) + 1;
-          localStorage.setItem('loghat_stats_feed_likes', currentLikesCount.toString());
-          
-          if (currentLikesCount >= 5) {
-            unlockBadgeId('social_liker');
-          }
-        }
-
         return {
           ...post,
           isLikedByUser: nextLiked,
@@ -242,10 +254,32 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
       }
       return post;
     }));
+
+    const token = localStorage.getItem('loghat_jwt_token');
+    if (token) {
+      try {
+        const API_BASE = window.location.origin.startsWith('capacitor://') ? 'https://loghatku.my' : '';
+        await fetch(`${API_BASE}/api/social/posts/${postId}/like`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to sync like with server', err);
+      }
+    } else {
+      const currentLikesCount = parseInt(localStorage.getItem('loghat_stats_feed_likes') || '0', 10) + 1;
+      localStorage.setItem('loghat_stats_feed_likes', currentLikesCount.toString());
+      if (currentLikesCount >= 5) {
+        unlockBadgeId('social_liker');
+      }
+    }
   };
 
   // Add Comment
-  const handleAddComment = (e: React.FormEvent, postId: string) => {
+  const handleAddComment = async (e: React.FormEvent, postId: string) => {
     e.preventDefault();
     const commentText = commentInputs[postId]?.trim();
     if (!commentText) return;
@@ -253,6 +287,7 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
     const authorName = userExtProfile.displayName;
     const authorAvatar = userExtProfile.heritageState === 'Malay' ? '🇲🇾' : '🥤';
 
+    // Optimistic UI update
     const newComment: Comment = {
       id: `c-${Date.now()}`,
       author: authorName,
@@ -277,12 +312,31 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
       [postId]: ''
     }));
 
-    // Unlock comment badge
-    unlockBadgeId('social_talkative');
+    const token = localStorage.getItem('loghat_jwt_token');
+    if (token) {
+      try {
+        const API_BASE = window.location.origin.startsWith('capacitor://') ? 'https://loghatku.my' : '';
+        const res = await fetch(`${API_BASE}/api/social/posts/${postId}/comments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ text: commentText })
+        });
+        if (res.ok) {
+          fetchPosts();
+        }
+      } catch (err) {
+        console.warn('Failed to sync comment with server', err);
+      }
+    } else {
+      unlockBadgeId('social_talkative');
+    }
   };
 
   // Create Post
-  const handleCreatePost = (e: React.FormEvent) => {
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostText.trim()) return;
 
@@ -309,6 +363,13 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
     const origin = userExtProfile.originState || 'Penang';
     const stateBadge = stateBadgeMap[origin] || '🌱 Loghat Novice';
 
+    const challengeDetails = postType === 'challenge' ? {
+      challengerScore: bestScore > 0 ? bestScore : 70,
+      stateFocus: challengeState,
+      challengerName: authorName
+    } : null;
+
+    // Optimistic UI Update
     const newPost: Post = {
       id: `post-${Date.now()}`,
       author: authorName,
@@ -321,23 +382,40 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
       type: postType,
       timestamp: 'Just now',
       comments: [],
-      isUltra: userProfile?.premiumTier === 'ultra'
+      isUltra: userProfile?.premiumTier === 'ultra',
+      challengeDetails: challengeDetails || undefined
     };
 
-    if (postType === 'challenge') {
-      newPost.challengeDetails = {
-        challengerScore: bestScore > 0 ? bestScore : 70,
-        stateFocus: challengeState,
-        challengerName: authorName
-      };
-    }
-
     setPosts(prev => [newPost, ...prev]);
+    const currentPostText = newPostText;
     setNewPostText('');
     setPostType('general');
 
-    // Unlock poster badge
-    unlockBadgeId('social_poster');
+    const token = localStorage.getItem('loghat_jwt_token');
+    if (token) {
+      try {
+        const API_BASE = window.location.origin.startsWith('capacitor://') ? 'https://loghatku.my' : '';
+        const res = await fetch(`${API_BASE}/api/social/posts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            text: currentPostText,
+            type: postType,
+            challengeDetails
+          })
+        });
+        if (res.ok) {
+          fetchPosts();
+        }
+      } catch (err) {
+        console.warn('Failed to create post on server', err);
+      }
+    } else {
+      unlockBadgeId('social_poster');
+    }
   };
 
   const unlockBadgeId = (badgeId: string) => {

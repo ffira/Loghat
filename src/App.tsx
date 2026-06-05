@@ -84,6 +84,8 @@ export default function App() {
     locationPermission: 'prompt' | 'granted' | 'denied';
     isPremiumUser: boolean;
     premiumTier: 'none' | 'adfree' | 'ultra';
+    referralCode: string | null;
+    balance: number;
   }>(() => {
     const defaultProfile = {
       email: null,
@@ -93,6 +95,8 @@ export default function App() {
       locationPermission: 'prompt' as const,
       isPremiumUser: false,
       premiumTier: 'none' as const,
+      referralCode: null,
+      balance: 0,
     };
     try {
       const stored = localStorage.getItem('loghat_user_profile');
@@ -127,6 +131,7 @@ export default function App() {
   const [emailInput, setEmailInput] = useState('');
   const [isEmailCodeSent, setIsEmailCodeSent] = useState(false);
   const [emailOtpInput, setEmailOtpInput] = useState('');
+  const [emailPreviewUrl, setEmailPreviewUrl] = useState<string | null>(null);
   
   const [countryCode, setCountryCode] = useState('+60');
   const [phoneInput, setPhoneInput] = useState('');
@@ -332,7 +337,8 @@ export default function App() {
         premiumTier: updatedFields.premiumTier ?? userProfile.premiumTier,
         bestScore: updatedFields.bestScore ?? userProfile.bestScore,
         bestRank: updatedFields.bestRank ?? userProfile.bestRank,
-        unlockedBadgeIds: getUnlockedBadgeIds()
+        unlockedBadgeIds: getUnlockedBadgeIds(),
+        referralCode: updatedFields.referralCode ?? userProfile.referralCode
       };
 
       await fetch(`${API_BASE}/api/users/sync`, {
@@ -374,7 +380,9 @@ export default function App() {
             phoneVerified: dbUser.phone_verified,
             locationPermission: dbUser.location_permission as any,
             isPremiumUser: dbUser.premium_tier !== 'none',
-            premiumTier: dbUser.premium_tier as any
+            premiumTier: dbUser.premium_tier as any,
+            referralCode: dbUser.referral_code || null,
+            balance: parseFloat(dbUser.balance || '0')
           });
           
           if (dbUser.unlocked_badge_ids) {
@@ -424,7 +432,9 @@ export default function App() {
             phoneVerified: dbUser.phone_verified,
             locationPermission: dbUser.location_permission as any,
             isPremiumUser: dbUser.premium_tier !== 'none',
-            premiumTier: dbUser.premium_tier as any
+            premiumTier: dbUser.premium_tier as any,
+            referralCode: dbUser.referral_code || null,
+            balance: parseFloat(dbUser.balance || '0')
           });
           
           if (dbUser.unlocked_badge_ids) {
@@ -478,7 +488,9 @@ export default function App() {
             phoneVerified: dbUser.phone_verified,
             locationPermission: dbUser.location_permission as any,
             isPremiumUser: dbUser.premium_tier !== 'none',
-            premiumTier: dbUser.premium_tier as any
+            premiumTier: dbUser.premium_tier as any,
+            referralCode: dbUser.referral_code || null,
+            balance: parseFloat(dbUser.balance || '0')
           });
           setFirstQuizCompleted(true);
           setForcedOnboarding(false);
@@ -1288,10 +1300,10 @@ export default function App() {
         {activeOnboardingStep === 'email' && (
           <div className="space-y-4 text-[#F5F5F5]">
             <div className="space-y-1 text-left">
-              <span className="text-[8.5px] uppercase tracking-widest font-mono text-crimson font-black block">Level 1: Firebase Auth Link</span>
+              <span className="text-[8.5px] uppercase tracking-widest font-mono text-crimson font-black block">Level 1: Secure Email Verification</span>
               <h4 className="text-xs sm:text-sm font-black text-white leading-snug">Secure User Profile Registration</h4>
               <p className="text-[9.5px] text-white/60 text-left leading-normal">
-                Please enter your email to log your verified record. We will issue a mock Firebase One-Time passcode context.
+                Please enter your email to verify and register your account. We will send a secure one-time passcode directly to your inbox.
               </p>
             </div>
 
@@ -1308,16 +1320,31 @@ export default function App() {
                     className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-crimson"
                   />
                   <button
-                    onClick={() => {
-                      if (!emailInput.trim() || !emailInput.includes('@')) {
+                    onClick={async () => {
+                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                      if (!emailInput.trim() || !emailRegex.test(emailInput.trim())) {
                         if (isIosSoundActive) playIosError();
                         alert('⚠️ Invalid Coordinates:\nPlease enter a valid email format before dispatching codes.');
                         return;
                       }
-                      setIsEmailCodeSent(true);
-                      triggerToast('✨ Firebase Auth code generated! See top Island notifications.', 'success');
                       
-
+                      try {
+                        const res = await fetch(`${API_BASE}/api/auth/send-code`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ email: emailInput.trim() })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                          setIsEmailCodeSent(true);
+                          setEmailPreviewUrl(data.previewUrl || null);
+                          triggerToast('✨ Verification code sent! Please check your email inbox.', 'success');
+                        } else {
+                          alert(`Verification Error:\n${data.error || 'Failed to dispatch verification code.'}`);
+                        }
+                      } catch (err) {
+                        alert('Server Connection Error:\nCould not reach the production database API.');
+                      }
                     }}
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
@@ -1339,25 +1366,25 @@ export default function App() {
                     />
                   </div>
                   
-                  <label className="text-[9.5px] text-[#aaa] font-bold block">We sent a mock verification code! Enter passcode below:</label>
+                  <label className="text-[9.5px] text-[#aaa] font-bold block">Enter the passcode sent to your email:</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Passcode (4092)"
+                      placeholder="Passcode (e.g. 123456)"
                       value={emailOtpInput}
                       onChange={(e) => setEmailOtpInput(e.target.value)}
                       className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2 text-xs tracking-widest text-center text-white focus:outline-none focus:border-gold"
                     />
                     <button
                       onClick={async () => {
-                        if (emailOtpInput.trim() !== '4092') {
-                          if (isIosSoundActive) playIosError();
-                          alert('Authentication Mismatch:\nThe passcode does not match (Hint: enter "4092")');
-                          return;
-                        }
                         if (onboardingPassword.trim().length < 6) {
                           if (isIosSoundActive) playIosError();
                           alert('Password Too Short:\nPlease choose a password containing at least 6 characters.');
+                          return;
+                        }
+                        if (!emailOtpInput.trim()) {
+                          if (isIosSoundActive) playIosError();
+                          alert('Verification Error:\nPlease enter the passcode sent to your email.');
                           return;
                         }
 
@@ -1367,27 +1394,29 @@ export default function App() {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                              email: emailInput,
+                              email: emailInput.trim(),
                               password: onboardingPassword,
                               nickname: 'Budak Loghat',
-                              originState: 'Kuala Lumpur'
+                              originState: 'Kuala Lumpur',
+                              code: emailOtpInput.trim()
                             })
                           });
 
+                          const data = await res.json();
                           if (res.ok) {
-                            const data = await res.json();
                             if (data.token) {
                               localStorage.setItem('loghat_jwt_token', data.token);
                               triggerToast('🎉 Email verified & production profile registered!', 'success');
                               updateProfile({
-                                email: emailInput,
-                                emailVerified: true
+                                email: emailInput.trim(),
+                                emailVerified: true,
+                                referralCode: data.user.referral_code,
+                                balance: parseFloat(data.user.balance || '0')
                               });
                               setActiveOnboardingStep('phone');
                             }
                           } else {
-                            const errData = await res.json();
-                            alert(`Registration Mismatch:\n${errData.error || 'Failed to register account'}`);
+                            alert(`Registration Mismatch:\n${data.error || 'Failed to register account'}`);
                           }
                         } catch (err) {
                           alert('Server Connection Error:\nCould not reach the production database API.');
@@ -1398,6 +1427,16 @@ export default function App() {
                       Verify
                     </button>
                   </div>
+                  {emailPreviewUrl && (
+                    <a 
+                      href={emailPreviewUrl} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="text-[10px] text-cyan-400 underline block mt-2 text-center font-bold"
+                    >
+                      🔗 Ethereal Sandbox: Click to View Mock Email Inbox ✉️
+                    </a>
+                  )}
                 </div>
               )}
             </div>

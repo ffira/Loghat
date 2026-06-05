@@ -91,16 +91,37 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
     }
 
     // 3. Referral Initialization
-    let myCode = localStorage.getItem('loghat_referral_code');
+    let myCode = userProfile?.referralCode || localStorage.getItem('loghat_referral_code');
     if (!myCode) {
       const randNum = Math.floor(1000 + Math.random() * 9000);
       myCode = `LGT-WAU-${randNum}`;
-      localStorage.setItem('loghat_referral_code', myCode);
     }
     setMyReferralCode(myCode);
+    localStorage.setItem('loghat_referral_code', myCode);
 
-    const balanceVal = parseInt(localStorage.getItem('loghat_referral_balance') || '0', 10);
-    setReferralBalance(balanceVal);
+    const fetchBalanceAndReferral = async () => {
+      const token = localStorage.getItem('loghat_jwt_token');
+      if (token) {
+        try {
+          const API_BASE = window.location.origin.startsWith('capacitor://') ? 'https://loghatku.my' : '';
+          const res = await fetch(`${API_BASE}/api/wallet/balance`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setReferralBalance(data.balance);
+            localStorage.setItem('loghat_referral_balance', data.balance.toString());
+          }
+        } catch (e) {
+          console.warn('Failed to sync wallet balance from server', e);
+        }
+      } else {
+        const balanceVal = parseFloat(localStorage.getItem('loghat_referral_balance') || '0');
+        setReferralBalance(balanceVal);
+      }
+    };
+
+    fetchBalanceAndReferral();
 
     // Setup listener for external referral trigger (from deep links)
     const handleUrlReferralPreset = (e: Event) => {
@@ -146,7 +167,7 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
     }, 2500);
   };
 
-  const handleRedeemCode = () => {
+  const handleRedeemCode = async () => {
     if (!friendCode.trim()) return;
     const cleanCode = friendCode.trim().toUpperCase();
     if (cleanCode === myReferralCode.toUpperCase()) {
@@ -157,47 +178,106 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
       return;
     }
     
-    let redeemedList: string[] = [];
-    try {
-      redeemedList = JSON.parse(localStorage.getItem('loghat_redeemed_codes') || '[]');
-    } catch (e) {}
+    const token = localStorage.getItem('loghat_jwt_token');
+    if (token) {
+      try {
+        const API_BASE = window.location.origin.startsWith('capacitor://') ? 'https://loghatku.my' : '';
+        const res = await fetch(`${API_BASE}/api/wallet/redeem`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ code: cleanCode })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          // Success! Fetch updated balance
+          const balanceRes = await fetch(`${API_BASE}/api/wallet/balance`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (balanceRes.ok) {
+            const balanceData = await balanceRes.json();
+            setReferralBalance(balanceData.balance);
+            localStorage.setItem('loghat_referral_balance', balanceData.balance.toString());
+          }
 
-    if (redeemedList.includes(cleanCode)) {
-      setReferStatus({ 
-        type: 'error', 
-        msg: appLanguage === 'bm' ? 'Kod ini telah ditebus sebelum ini!' : 'You have already redeemed this referral code!' 
-      });
-      return;
-    }
+          // Unlock Referral Pioneer badge
+          const unlockedIds = getUnlockedBadgeIds();
+          if (!unlockedIds.includes('referral_pioneer')) {
+            const updatedList = [...unlockedIds, 'referral_pioneer'];
+            localStorage.setItem('loghat_unlocked_badge_ids', JSON.stringify(updatedList));
+            window.dispatchEvent(new CustomEvent('loghat_badge_unlocked', { detail: { id: 'referral_pioneer' } }));
+          }
 
-    redeemedList.push(cleanCode);
-    localStorage.setItem('loghat_redeemed_codes', JSON.stringify(redeemedList));
+          setReferStatus({ 
+            type: 'success', 
+            msg: appLanguage === 'bm' ? '✓ Kod berjaya! RM5 baki dikreditkan & Lencana Perintis dibuka!' : '✓ Success! RM5 credited and Referral Pioneer Badge unlocked!' 
+          });
+          setFriendCode('');
 
-    const newBalance = referralBalance + 5;
-    setReferralBalance(newBalance);
-    localStorage.setItem('loghat_referral_balance', newBalance.toString());
-
-    // Unlock Referral Pioneer badge
-    const unlockedIds = getUnlockedBadgeIds();
-    if (!unlockedIds.includes('referral_pioneer')) {
-      const updatedList = [...unlockedIds, 'referral_pioneer'];
-      localStorage.setItem('loghat_unlocked_badge_ids', JSON.stringify(updatedList));
-      window.dispatchEvent(new CustomEvent('loghat_badge_unlocked', { detail: { id: 'referral_pioneer' } }));
-    }
-
-    setReferStatus({ 
-      type: 'success', 
-      msg: appLanguage === 'bm' ? '✓ Kod berjaya! RM5 baki dikreditkan & Lencana Perintis dibuka!' : '✓ Success! RM5 credited and Referral Pioneer Badge unlocked!' 
-    });
-    setFriendCode('');
-
-    // Trigger local push notification simulation
-    window.dispatchEvent(new CustomEvent('loghat_push_notification', {
-      detail: {
-        title: '🎁 Ganjaran Rujukan / Referral Reward!',
-        body: appLanguage === 'bm' ? 'Penebusan kod berjaya! RM5 telah dikreditkan ke baki anda.' : 'Referral code redeemed! RM5 has been credited to your balance.'
+          // Trigger local push notification simulation
+          window.dispatchEvent(new CustomEvent('loghat_push_notification', {
+            detail: {
+              title: '🎁 Ganjaran Rujukan / Referral Reward!',
+              body: appLanguage === 'bm' ? 'Penebusan kod berjaya! RM5 telah dikreditkan ke baki anda.' : 'Referral code redeemed! RM5 has been credited to your balance.'
+            }
+          }));
+        } else {
+          setReferStatus({
+            type: 'error',
+            msg: data.error || 'Referral code redemption failed.'
+          });
+        }
+      } catch (err) {
+        setReferStatus({
+          type: 'error',
+          msg: 'Server connection failed.'
+        });
       }
-    }));
+    } else {
+      let redeemedList: string[] = [];
+      try {
+        redeemedList = JSON.parse(localStorage.getItem('loghat_redeemed_codes') || '[]');
+      } catch (e) {}
+
+      if (redeemedList.includes(cleanCode)) {
+        setReferStatus({ 
+          type: 'error', 
+          msg: appLanguage === 'bm' ? 'Kod ini telah ditebus sebelum ini!' : 'You have already redeemed this referral code!' 
+        });
+        return;
+      }
+
+      redeemedList.push(cleanCode);
+      localStorage.setItem('loghat_redeemed_codes', JSON.stringify(redeemedList));
+
+      const newBalance = referralBalance + 5;
+      setReferralBalance(newBalance);
+      localStorage.setItem('loghat_referral_balance', newBalance.toString());
+
+      // Unlock Referral Pioneer badge
+      const unlockedIds = getUnlockedBadgeIds();
+      if (!unlockedIds.includes('referral_pioneer')) {
+        const updatedList = [...unlockedIds, 'referral_pioneer'];
+        localStorage.setItem('loghat_unlocked_badge_ids', JSON.stringify(updatedList));
+        window.dispatchEvent(new CustomEvent('loghat_badge_unlocked', { detail: { id: 'referral_pioneer' } }));
+      }
+
+      setReferStatus({ 
+        type: 'success', 
+        msg: appLanguage === 'bm' ? '✓ Kod berjaya! RM5 baki dikreditkan & Lencana Perintis dibuka!' : '✓ Success! RM5 credited and Referral Pioneer Badge unlocked!' 
+      });
+      setFriendCode('');
+
+      // Trigger local push notification simulation
+      window.dispatchEvent(new CustomEvent('loghat_push_notification', {
+        detail: {
+          title: '🎁 Ganjaran Rujukan / Referral Reward!',
+          body: appLanguage === 'bm' ? 'Penebusan kod berjaya! RM5 telah dikreditkan ke baki anda.' : 'Referral code redeemed! RM5 has been credited to your balance.'
+        }
+      }));
+    }
   };
 
   const handleRateApp = (stars: number) => {

@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 import Stripe from 'stripe';
+import nodemailer from 'nodemailer';
 import { 
   initializeDbSchema, 
   getUserById, 
@@ -15,7 +16,19 @@ import {
   createUser, 
   updateUser, 
   logTransaction,
-  DBUser 
+  getUserByReferralCode,
+  getSocialFeed,
+  createPost,
+  toggleLike,
+  addComment,
+  getWalletBalance,
+  addWalletTransaction,
+  hasUserRedeemedReferral,
+  saveVerificationCode,
+  verifyVerificationCode,
+  DBUser,
+  DBPost,
+  DBPostComment 
 } from './src/database';
 
 // Load environment variables
@@ -29,6 +42,67 @@ const JWT_SECRET = process.env.JWT_SECRET || 'loghat_super_secret_jwt_key_2026';
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2023-10-16' as any }) : null;
+
+// Initialize SMTP Transporter for Email Verification
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || '',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+  },
+});
+
+async function sendVerificationEmail(email: string, code: string): Promise<string | null> {
+  let activeTransporter = transporter;
+  let previewUrl = null;
+  
+  const isSmtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  if (!isSmtpConfigured) {
+    console.log('⚠️ SMTP not configured. Generating Ethereal Mail test credentials...');
+    try {
+      const testAccount = await nodemailer.createTestAccount();
+      activeTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
+    } catch (e: any) {
+      console.error('✕ Failed to create Ethereal Mail account:', e.message);
+      return null;
+    }
+  }
+
+  const mailOptions = {
+    from: '"Loghat preserving platform" <no-reply@loghatku.my>',
+    to: email.toLowerCase(),
+    subject: '🔑 Loghat Verification Passcode',
+    text: `Hello! Your verification passcode is: ${code}. It will expire in 10 minutes.`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b; padding: 25px; border-radius: 16px; background: #07090e; color: #ffffff;">
+        <h2 style="color: #22d3ee; text-align: center; font-size: 24px; font-weight: 800; letter-spacing: 1px;">Loghat 🇲🇾</h2>
+        <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">Hello there! You requested a verification passcode to link your email address.</p>
+        <div style="background: #0f172a; border: 1px solid #334155; padding: 20px; text-align: center; border-radius: 12px; margin: 25px 0;">
+          <span style="font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #22d3ee; font-family: monospace;">${code}</span>
+        </div>
+        <p style="font-size: 11px; color: #475569; text-align: center; line-height: 1.4; margin-top: 25px;">This passcode will expire in 10 minutes. If you did not request this code, you can ignore this email safely.</p>
+      </div>
+    `
+  };
+
+  const info = await activeTransporter.sendMail(mailOptions);
+  console.log('📧 Verification email sent successfully to: %s', email);
+  if (!isSmtpConfigured) {
+    previewUrl = nodemailer.getTestMessageUrl(info);
+    console.log('🔗 [Ethereal Mail Preview URL]: %s', previewUrl);
+  }
+  return previewUrl;
+}
 
 // Initialize Database Schema on start
 initializeDbSchema().catch(console.error);
@@ -111,17 +185,84 @@ const authenticateToken = (req: any, res: express.Response, next: express.NextFu
   });
 };
 
+// Helper: JWT optional verification middleware for reading public resources
+const optionalAuthenticate = (req: any, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    req.user = { id: 'usr-guest' };
+    return next();
+  }
+
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) {
+      req.user = { id: 'usr-guest' };
+    } else {
+      req.user = user;
+    }
+    next();
+  });
+};
+
 // 3. User Authentication Endpoints
 
-// Email/Password Registration
-app.post('/api/auth/register', async (req: express.Request, res: express.Response) => {
-  const { email, password, nickname, originState } = req.body;
+// Email Verification Code Request
+app.post('/api/auth/send-code', async (req: express.Request, res: express.Response) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email address is required.' });
+  }
 
-  if (!email || !password || !nickname) {
-    return res.status(400).json({ error: 'Required fields: email, password, nickname' });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address structure.' });
   }
 
   try {
+    // Check if account already exists
+    const existing = await getUserByEmail(email);
+    if (existing) {
+      return res.status(400).json({ error: 'An account with this email already exists.' });
+    }
+
+    // Generate random 6 digit numeric code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    await saveVerificationCode(email, code);
+
+    // Send the email
+    const previewUrl = await sendVerificationEmail(email, code);
+
+    res.json({ 
+      success: true, 
+      message: 'Verification code sent to your email address!',
+      previewUrl // non-null if using Ethereal mock
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Email/Password Registration
+app.post('/api/auth/register', async (req: express.Request, res: express.Response) => {
+  const { email, password, nickname, originState, code } = req.body;
+
+  if (!email || !password || !nickname || !code) {
+    return res.status(400).json({ error: 'Required fields: email, password, nickname, and verification code.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address structure.' });
+  }
+
+  try {
+    // Verify one-time passcode
+    const isVerified = await verifyVerificationCode(email, code);
+    if (!isVerified) {
+      return res.status(400).json({ error: 'Invalid or expired verification code!' });
+    }
+
     const existing = await getUserByEmail(email);
     if (existing) {
       return res.status(400).json({ error: 'An account with this email already exists' });
@@ -143,7 +284,7 @@ app.post('/api/auth/register', async (req: express.Request, res: express.Respons
       best_score: 0,
       best_rank: 'Tourist',
       balance: 0,
-      email_verified: false,
+      email_verified: true, // Mark verified since code verification succeeded
       phone_verified: false,
       location_permission: 'denied',
       unlocked_badge_ids: '[]'
@@ -370,7 +511,7 @@ app.get('/api/users/profile', authenticateToken, async (req: any, res: express.R
 });
 
 app.post('/api/users/sync', authenticateToken, async (req: any, res: express.Response) => {
-  const { nickname, originState, premiumTier, bestScore, bestRank, unlockedBadgeIds } = req.body;
+  const { nickname, originState, premiumTier, bestScore, bestRank, unlockedBadgeIds, referralCode } = req.body;
   try {
     const updated = await updateUser(req.user.id, {
       nickname,
@@ -378,13 +519,142 @@ app.post('/api/users/sync', authenticateToken, async (req: any, res: express.Res
       premium_tier: premiumTier,
       best_score: bestScore,
       best_rank: bestRank,
-      unlocked_badge_ids: unlockedBadgeIds ? JSON.stringify(unlockedBadgeIds) : undefined
+      unlocked_badge_ids: unlockedBadgeIds ? JSON.stringify(unlockedBadgeIds) : undefined,
+      referral_code: referralCode
     });
     res.json({ user: updated });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 6. Social Feed Endpoints
+
+// Fetch public feed (guest/authenticated)
+app.get('/api/social/feed', optionalAuthenticate, async (req: any, res) => {
+  try {
+    const feed = await getSocialFeed(req.user.id);
+    res.json(feed);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create new post (authenticated)
+app.post('/api/social/posts', authenticateToken, async (req: any, res) => {
+  const { text, type, challengeDetails } = req.body;
+  if (!text) {
+    return res.status(400).json({ error: 'Post content (text) is required' });
+  }
+  try {
+    const newPost: DBPost = {
+      id: `post-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      user_id: req.user.id,
+      post_type: type || 'general',
+      content: text,
+      challenge_details: challengeDetails ? JSON.stringify(challengeDetails) : null,
+      created_at: new Date().toISOString()
+    };
+    await createPost(newPost);
+    res.status(201).json(newPost);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Toggle post like status (authenticated)
+app.post('/api/social/posts/:id/like', authenticateToken, async (req: any, res) => {
+  const postId = req.params.id;
+  try {
+    const liked = await toggleLike(req.user.id, postId);
+    res.json({ liked });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add comment to a post (authenticated)
+app.post('/api/social/posts/:id/comments', authenticateToken, async (req: any, res) => {
+  const postId = req.params.id;
+  const { text } = req.body;
+  if (!text) {
+    return res.status(400).json({ error: 'Comment content (text) is required' });
+  }
+  try {
+    const newComment: DBPostComment = {
+      id: `c-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      post_id: postId,
+      user_id: req.user.id,
+      content: text,
+      created_at: new Date().toISOString()
+    };
+    await addComment(newComment);
+    res.status(201).json(newComment);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. Wallet & Ledger Endpoints
+
+// Fetch wallet balance (authenticated)
+app.get('/api/wallet/balance', authenticateToken, async (req: any, res) => {
+  try {
+    const balance = await getWalletBalance(req.user.id);
+    res.json({ balance });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Redeem friend's referral code (authenticated)
+app.post('/api/wallet/redeem', authenticateToken, async (req: any, res) => {
+  const { code } = req.body;
+  if (!code) {
+    return res.status(400).json({ error: 'Referral code is required' });
+  }
+  try {
+    const cleanCode = code.trim().toUpperCase();
+    const redeemer = await getUserById(req.user.id);
+    if (!redeemer) {
+      return res.status(404).json({ error: 'Redeemer account not found' });
+    }
+
+    if (redeemer.referral_code?.toUpperCase() === cleanCode) {
+      return res.status(400).json({ error: 'Cannot redeem your own referral code!' });
+    }
+
+    const owner = await getUserByReferralCode(cleanCode);
+    if (!owner) {
+      return res.status(400).json({ error: 'Invalid referral code!' });
+    }
+
+    // Check if user has already redeemed a code
+    const alreadyRedeemed = await hasUserRedeemedReferral(req.user.id);
+    if (alreadyRedeemed) {
+      return res.status(400).json({ error: 'You have already redeemed a referral code!' });
+    }
+
+    // Award both
+    await addWalletTransaction(
+      redeemer.id, 
+      5.00, 
+      'referral_redeem', 
+      `Redeemed referral code ${cleanCode} from user ${owner.nickname}`
+    );
+    await addWalletTransaction(
+      owner.id, 
+      5.00, 
+      'referral_reward', 
+      `User ${redeemer.nickname} redeemed your referral code`
+    );
+
+    res.json({ success: true, message: 'Referral code successfully redeemed! RM5 credited.' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Serve frontend built static pages in production
 const distPath = path.resolve(process.cwd(), 'dist');
