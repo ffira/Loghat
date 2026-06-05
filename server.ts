@@ -55,6 +55,50 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendVerificationEmail(email: string, code: string): Promise<string | null> {
+  const fromEmail = process.env.SMTP_FROM || 'no-reply@loghatku.my';
+  const htmlContent = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b; padding: 25px; border-radius: 16px; background: #07090e; color: #ffffff;">
+      <h2 style="color: #22d3ee; text-align: center; font-size: 24px; font-weight: 800; letter-spacing: 1px;">Loghat 🇲🇾</h2>
+      <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">Hello there! You requested a verification passcode to link your email address.</p>
+      <div style="background: #0f172a; border: 1px solid #334155; padding: 20px; text-align: center; border-radius: 12px; margin: 25px 0;">
+        <span style="font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #22d3ee; font-family: monospace;">${code}</span>
+      </div>
+      <p style="font-size: 11px; color: #475569; text-align: center; line-height: 1.4; margin-top: 25px;">This passcode will expire in 10 minutes. If you did not request this code, you can ignore this email safely.</p>
+    </div>
+  `;
+
+  if (process.env.RESEND_API_KEY) {
+    console.log('📬 RESEND_API_KEY found. Dispatching email via Resend HTTP API...');
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `"Loghat preserving platform" <${fromEmail}>`,
+          to: [email.toLowerCase()],
+          subject: '🔑 Loghat Verification Passcode',
+          text: `Hello! Your verification passcode is: ${code}. It will expire in 10 minutes.`,
+          html: htmlContent
+        })
+      });
+
+      const resData = await res.json() as any;
+      if (res.ok) {
+        console.log('📧 Verification email sent successfully via Resend API. ID:', resData.id);
+        return null;
+      } else {
+        console.error('✕ Resend API error response:', resData);
+        throw new Error(resData.message || 'Resend API returned an error status.');
+      }
+    } catch (apiErr: any) {
+      console.error('✕ Failed to send via Resend API, falling back to nodemailer SMTP:', apiErr.message);
+      // Fall through to nodemailer SMTP
+    }
+  }
+
   let activeTransporter = transporter;
   let previewUrl = null;
   
@@ -79,20 +123,11 @@ async function sendVerificationEmail(email: string, code: string): Promise<strin
   }
 
   const mailOptions = {
-    from: '"Loghat preserving platform" <no-reply@loghatku.my>',
+    from: `"Loghat preserving platform" <${fromEmail}>`,
     to: email.toLowerCase(),
     subject: '🔑 Loghat Verification Passcode',
     text: `Hello! Your verification passcode is: ${code}. It will expire in 10 minutes.`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b; padding: 25px; border-radius: 16px; background: #07090e; color: #ffffff;">
-        <h2 style="color: #22d3ee; text-align: center; font-size: 24px; font-weight: 800; letter-spacing: 1px;">Loghat 🇲🇾</h2>
-        <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">Hello there! You requested a verification passcode to link your email address.</p>
-        <div style="background: #0f172a; border: 1px solid #334155; padding: 20px; text-align: center; border-radius: 12px; margin: 25px 0;">
-          <span style="font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #22d3ee; font-family: monospace;">${code}</span>
-        </div>
-        <p style="font-size: 11px; color: #475569; text-align: center; line-height: 1.4; margin-top: 25px;">This passcode will expire in 10 minutes. If you did not request this code, you can ignore this email safely.</p>
-      </div>
-    `
+    html: htmlContent
   };
 
   const info = await activeTransporter.sendMail(mailOptions);

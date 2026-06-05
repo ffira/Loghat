@@ -283,7 +283,16 @@ export default function App() {
     }
   }, [isPushBannerVisible]);
 
-
+  // Auto-set the active onboarding step based on current profile completion status
+  useEffect(() => {
+    if (!userProfile.emailVerified) {
+      setActiveOnboardingStep('email');
+    } else if (!userProfile.phoneVerified) {
+      setActiveOnboardingStep('phone');
+    } else {
+      setActiveOnboardingStep('location');
+    }
+  }, [userProfile.emailVerified, userProfile.phoneVerified, userProfile.locationPermission]);
 
   // Custom Toast with sound trigger
   const triggerToast = (msg: string, type: 'success' | 'info' = 'success') => {
