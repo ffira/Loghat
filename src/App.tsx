@@ -1258,7 +1258,7 @@ export default function App() {
             </p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); handleBackendLogin(); }} className="space-y-3.5">
+          <form onSubmit={(e) => { e.preventDefault(); handleBackendLogin(); }} className="space-y-3.5" noValidate>
             <div>
               <label className="text-[9px] text-[#888] font-mono uppercase tracking-wider block mb-1">Email Address</label>
               <input
@@ -1410,11 +1410,11 @@ export default function App() {
             </div>
 
             <div className="space-y-3.5">
-              <form onSubmit={handleSendEmailCode}>
+              <form onSubmit={handleSendEmailCode} noValidate>
                 <label className="text-[9px] text-[#888] font-mono uppercase tracking-wider block mb-1">Email Coordinates *</label>
                 <div className="flex gap-2">
                   <input
-                    type="email"
+                    type="text"
                     placeholder="nama@anda.com"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
@@ -1422,7 +1422,8 @@ export default function App() {
                     className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-crimson"
                   />
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleSendEmailCode}
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
                     {isEmailCodeSent ? 'Re-send' : 'Send Code'}
@@ -1431,7 +1432,7 @@ export default function App() {
               </form>
 
               {isEmailCodeSent && (
-                <form onSubmit={handleVerifyEmailCode} className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left">
+                <form onSubmit={handleVerifyEmailCode} className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left" noValidate>
                   <div className="space-y-1">
                     <label className="text-[9.5px] text-[#aaa] font-bold block">Choose Password (min 6 chars) *</label>
                     <input
@@ -1453,7 +1454,8 @@ export default function App() {
                       className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2 text-xs tracking-widest text-center text-white focus:outline-none focus:border-gold"
                     />
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleVerifyEmailCode}
                       className="px-4 bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-black uppercase rounded-xl transition cursor-pointer"
                     >
                       Verify
@@ -1487,7 +1489,7 @@ export default function App() {
             </div>
 
             <div className="space-y-3.5">
-              <form onSubmit={handleSendPhoneCode}>
+              <form onSubmit={handleSendPhoneCode} noValidate>
                 <label className="text-[9px] text-[#888] font-mono uppercase tracking-wider block mb-1">Mobile Contact *</label>
                 <div className="flex flex-wrap gap-2">
                   <select
@@ -1500,14 +1502,15 @@ export default function App() {
                     <option value="+1">🇺🇸 +1</option>
                   </select>
                   <input
-                    type="tel"
+                    type="text"
                     placeholder="123456789"
                     value={phoneInput}
                     onChange={(e) => setPhoneInput(e.target.value)}
                     className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-crimson"
                   />
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleSendPhoneCode}
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
                     {isPhoneCodeSent ? 'Re-send' : 'Verify via SMS'}
@@ -1516,7 +1519,7 @@ export default function App() {
               </form>
 
               {isPhoneCodeSent && (
-                <form onSubmit={handleVerifyPhoneCode} className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left">
+                <form onSubmit={handleVerifyPhoneCode} className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left" noValidate>
                   <label className="text-[9.5px] text-[#aaa] font-bold block">We dispatched our mock SMS OTP passcodes. Please key in OTP:</label>
                   <div className="flex gap-2">
                     <input
@@ -1527,7 +1530,8 @@ export default function App() {
                       className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2 text-xs tracking-widest text-center text-white focus:outline-none focus:border-gold"
                     />
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleVerifyPhoneCode}
                       className="px-4 bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-black uppercase rounded-xl transition cursor-pointer"
                     >
                       Confirm
