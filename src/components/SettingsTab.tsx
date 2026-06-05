@@ -167,7 +167,8 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
     }, 2500);
   };
 
-  const handleRedeemCode = async () => {
+  const handleRedeemCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!friendCode.trim()) return;
     const cleanCode = friendCode.trim().toUpperCase();
     if (cleanCode === myReferralCode.toUpperCase()) {
@@ -772,7 +773,7 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
             </div>
 
             {/* Enter friend code */}
-            <div>
+            <form onSubmit={handleRedeemCode}>
               <label className="block text-[9px] uppercase font-mono tracking-wider text-white/40 mb-1 font-bold">
                 {appLanguage === 'bm' ? 'Tebus Kod Rakan:' : "Enter Friend's Referral Code:"}
               </label>
@@ -785,7 +786,7 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
                   className="flex-1 bg-[#121212] border border-white/10 text-white rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-gold"
                 />
                 <button
-                  onClick={handleRedeemCode}
+                  type="submit"
                   disabled={!friendCode.trim()}
                   className={`px-4 font-extrabold text-xs rounded-lg transition-all border ${
                     friendCode.trim()
@@ -796,7 +797,7 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
                   {t('referClaimBtn', appLanguage)}
                 </button>
               </div>
-            </div>
+            </form>
 
             {referStatus.msg && (
               <p className={`text-2xs font-semibold text-center ${referStatus.type === 'success' ? 'text-emerald-400' : 'text-crimson'}`}>

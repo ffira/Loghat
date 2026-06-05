@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FormEvent } from 'react';
 import { DialectEntry, PendingEdit, PrimaryLanguage, SponsorAd } from './types';
 import { INITIAL_DIALECT_ENTRIES, INITIAL_PENDING_EDITS, INITIAL_SPONSOR_ADS } from './data/dialectData';
 
@@ -397,6 +397,108 @@ export default function App() {
       }
     } catch (e) {
       console.warn('Failed to sync session with production API backend:', e);
+    }
+  };
+
+  const handleSendEmailCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailInput.trim() || !emailRegex.test(emailInput.trim())) {
+      if (isIosSoundActive) playIosError();
+      alert('⚠️ Invalid Coordinates:\nPlease enter a valid email format before dispatching codes.');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput.trim() })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsEmailCodeSent(true);
+        setEmailPreviewUrl(data.previewUrl || null);
+        triggerToast('✨ Verification code sent! Please check your email inbox.', 'success');
+      } else {
+        alert(`Verification Error:\n${data.error || 'Failed to dispatch verification code.'}`);
+      }
+    } catch (err) {
+      alert('Server Connection Error:\nCould not reach the production database API.');
+    }
+  };
+
+  const handleVerifyEmailCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (onboardingPassword.trim().length < 6) {
+      if (isIosSoundActive) playIosError();
+      alert('Password Too Short:\nPlease choose a password containing at least 6 characters.');
+      return;
+    }
+    if (!emailOtpInput.trim()) {
+      if (isIosSoundActive) playIosError();
+      alert('Verification Error:\nPlease enter the passcode sent to your email.');
+      return;
+    }
+
+    // Register on Backend database!
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailInput.trim(),
+          password: onboardingPassword,
+          nickname: 'Budak Loghat',
+          originState: 'Kuala Lumpur',
+          code: emailOtpInput.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        if (data.token) {
+          localStorage.setItem('loghat_jwt_token', data.token);
+          triggerToast('🎉 Email verified & production profile registered!', 'success');
+          updateProfile({
+            email: emailInput.trim(),
+            emailVerified: true,
+            referralCode: data.user.referral_code,
+            balance: parseFloat(data.user.balance || '0')
+          });
+          setActiveOnboardingStep('phone');
+        }
+      } else {
+        alert(`Registration Mismatch:\n${data.error || 'Failed to register account'}`);
+      }
+    } catch (err) {
+      alert('Server Connection Error:\nCould not reach the production database API.');
+    }
+  };
+
+  const handleSendPhoneCode = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!phoneInput.trim() || phoneInput.length < 7) {
+      if (isIosSoundActive) playIosError();
+      alert('⚠️ Contact Invalid:\nPlease enter a valid mobile number.');
+      return;
+    }
+    setIsPhoneCodeSent(true);
+    triggerToast('⚡ SMS OTP code generated!', 'success');
+  };
+
+  const handleVerifyPhoneCode = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (phoneOtpInput.trim() === '8153') {
+      triggerToast('🎉 Phone verified and status: complete in Firestore!', 'success');
+      updateProfile({
+        phone: `${countryCode}${phoneInput}`,
+        phoneVerified: true
+      });
+      setActiveOnboardingStep('location');
+    } else {
+      if (isIosSoundActive) playIosError();
+      alert('✕ OTP Mismatch:\nThe passcode is incorrect (Hint: enter "8153")');
     }
   };
 
@@ -1308,7 +1410,7 @@ export default function App() {
             </div>
 
             <div className="space-y-3.5">
-              <div>
+              <form onSubmit={handleSendEmailCode}>
                 <label className="text-[9px] text-[#888] font-mono uppercase tracking-wider block mb-1">Email Coordinates *</label>
                 <div className="flex gap-2">
                   <input
@@ -1320,41 +1422,16 @@ export default function App() {
                     className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-crimson"
                   />
                   <button
-                    onClick={async () => {
-                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                      if (!emailInput.trim() || !emailRegex.test(emailInput.trim())) {
-                        if (isIosSoundActive) playIosError();
-                        alert('⚠️ Invalid Coordinates:\nPlease enter a valid email format before dispatching codes.');
-                        return;
-                      }
-                      
-                      try {
-                        const res = await fetch(`${API_BASE}/api/auth/send-code`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ email: emailInput.trim() })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                          setIsEmailCodeSent(true);
-                          setEmailPreviewUrl(data.previewUrl || null);
-                          triggerToast('✨ Verification code sent! Please check your email inbox.', 'success');
-                        } else {
-                          alert(`Verification Error:\n${data.error || 'Failed to dispatch verification code.'}`);
-                        }
-                      } catch (err) {
-                        alert('Server Connection Error:\nCould not reach the production database API.');
-                      }
-                    }}
+                    type="submit"
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
                     {isEmailCodeSent ? 'Re-send' : 'Send Code'}
                   </button>
                 </div>
-              </div>
+              </form>
 
               {isEmailCodeSent && (
-                <div className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left">
+                <form onSubmit={handleVerifyEmailCode} className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left">
                   <div className="space-y-1">
                     <label className="text-[9.5px] text-[#aaa] font-bold block">Choose Password (min 6 chars) *</label>
                     <input
@@ -1376,52 +1453,7 @@ export default function App() {
                       className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2 text-xs tracking-widest text-center text-white focus:outline-none focus:border-gold"
                     />
                     <button
-                      onClick={async () => {
-                        if (onboardingPassword.trim().length < 6) {
-                          if (isIosSoundActive) playIosError();
-                          alert('Password Too Short:\nPlease choose a password containing at least 6 characters.');
-                          return;
-                        }
-                        if (!emailOtpInput.trim()) {
-                          if (isIosSoundActive) playIosError();
-                          alert('Verification Error:\nPlease enter the passcode sent to your email.');
-                          return;
-                        }
-
-                        // Register on Backend database!
-                        try {
-                          const res = await fetch(`${API_BASE}/api/auth/register`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              email: emailInput.trim(),
-                              password: onboardingPassword,
-                              nickname: 'Budak Loghat',
-                              originState: 'Kuala Lumpur',
-                              code: emailOtpInput.trim()
-                            })
-                          });
-
-                          const data = await res.json();
-                          if (res.ok) {
-                            if (data.token) {
-                              localStorage.setItem('loghat_jwt_token', data.token);
-                              triggerToast('🎉 Email verified & production profile registered!', 'success');
-                              updateProfile({
-                                email: emailInput.trim(),
-                                emailVerified: true,
-                                referralCode: data.user.referral_code,
-                                balance: parseFloat(data.user.balance || '0')
-                              });
-                              setActiveOnboardingStep('phone');
-                            }
-                          } else {
-                            alert(`Registration Mismatch:\n${data.error || 'Failed to register account'}`);
-                          }
-                        } catch (err) {
-                          alert('Server Connection Error:\nCould not reach the production database API.');
-                        }
-                      }}
+                      type="submit"
                       className="px-4 bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-black uppercase rounded-xl transition cursor-pointer"
                     >
                       Verify
@@ -1437,7 +1469,7 @@ export default function App() {
                       🔗 Ethereal Sandbox: Click to View Mock Email Inbox ✉️
                     </a>
                   )}
-                </div>
+                </form>
               )}
             </div>
           </div>
@@ -1455,7 +1487,7 @@ export default function App() {
             </div>
 
             <div className="space-y-3.5">
-              <div>
+              <form onSubmit={handleSendPhoneCode}>
                 <label className="text-[9px] text-[#888] font-mono uppercase tracking-wider block mb-1">Mobile Contact *</label>
                 <div className="flex flex-wrap gap-2">
                   <select
@@ -1475,26 +1507,16 @@ export default function App() {
                     className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-crimson"
                   />
                   <button
-                    onClick={() => {
-                      if (!phoneInput.trim() || phoneInput.length < 7) {
-                        if (isIosSoundActive) playIosError();
-                        alert('⚠️ Contact Invalid:\nPlease enter a valid mobile number.');
-                        return;
-                      }
-                      setIsPhoneCodeSent(true);
-                      triggerToast('⚡ SMS OTP code generated!', 'success');
-                      
-
-                    }}
+                    type="submit"
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
                     {isPhoneCodeSent ? 'Re-send' : 'Verify via SMS'}
                   </button>
                 </div>
-              </div>
+              </form>
 
               {isPhoneCodeSent && (
-                <div className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left">
+                <form onSubmit={handleVerifyPhoneCode} className="p-3.5 bg-black/40 rounded-xl border border-white/5 space-y-3 animate-slideDown text-left">
                   <label className="text-[9.5px] text-[#aaa] font-bold block">We dispatched our mock SMS OTP passcodes. Please key in OTP:</label>
                   <div className="flex gap-2">
                     <input
@@ -1505,25 +1527,13 @@ export default function App() {
                       className="flex-1 bg-black border border-white/15 rounded-xl px-3 py-2 text-xs tracking-widest text-center text-white focus:outline-none focus:border-gold"
                     />
                     <button
-                      onClick={() => {
-                        if (phoneOtpInput.trim() === '8153') {
-                          triggerToast('🎉 Phone verified and status: complete in Firestore!', 'success');
-                          updateProfile({
-                            phone: `${countryCode}${phoneInput}`,
-                            phoneVerified: true
-                          });
-                          setActiveOnboardingStep('location');
-                        } else {
-                          if (isIosSoundActive) playIosError();
-                          alert('✕ OTP Mismatch:\nThe passcode is incorrect (Hint: enter "8153")');
-                        }
-                      }}
+                      type="submit"
                       className="px-4 bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-black uppercase rounded-xl transition cursor-pointer"
                     >
                       Confirm
                     </button>
                   </div>
-                </div>
+                </form>
               )}
             </div>
           </div>
