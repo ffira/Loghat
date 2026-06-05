@@ -31,8 +31,12 @@ import {
   DBPostComment 
 } from './src/database';
 
-// Load environment variables
+// Load environment variables — prefer .env, fall back to .env.production
+// so RESEND_API_KEY / JWT_SECRET etc. are available when only .env.production exists.
 dotenv.config();
+if (!process.env.RESEND_API_KEY && !process.env.JWT_SECRET) {
+  dotenv.config({ path: '.env.production', override: false });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
