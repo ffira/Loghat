@@ -9,6 +9,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deploy Hook
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          curl -s "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-          echo "Deploy triggered successfully"
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL secret is missing! Please configure it in your GitHub repository settings."
+            echo "========================================================"
+            echo "HOW TO RESOLVE THIS DEPLOYMENT FAILURE:"
+            echo "1. Go to your Render Dashboard: https://dashboard.render.com"
+            echo "2. Select your Loghat Web Service."
+            echo "3. Go to 'Settings' and scroll down to the 'Deploy Hook' section."
+            echo "4. Copy the Deploy Hook URL."
+            echo "5. Go to your GitHub Repository settings page in a browser."
+            echo "6. Go to Settings -> Secrets and variables -> Actions."
+            echo "7. Click 'New repository secret'."
+            echo "8. Set the Name to: RENDER_DEPLOY_HOOK_URL"
+            echo "9. Paste the copied Deploy Hook URL in the Value field."
+            echo "10. Click 'Add secret' and re-run this failed GitHub Action."
+            echo "========================================================"
+            exit 1
+          fi
+
+          echo "Triggering deploy via Render hook..."
+          RESPONSE=$(curl -s -w "%{http_code}" -o /tmp/deploy_response.txt "$DEPLOY_HOOK")
+          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
+            echo "✅ Deploy triggered successfully!"
+            cat /tmp/deploy_response.txt
+          else
+            echo "❌ Failed to trigger deploy! HTTP Status Code: $RESPONSE"
+            cat /tmp/deploy_response.txt
+            exit 1
+          fi
