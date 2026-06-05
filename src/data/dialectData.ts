@@ -1987,7 +1987,7 @@ export const INITIAL_SPONSOR_ADS = [
 export const ALL_BADGES: Badge[] = [
   {
     id: 'penang_master',
-    name: 'Penang Boss / Otai Penang',
+    name: 'Anak Penang / Otai Penang',
     category: 'State',
     description: 'Unlocked by exploring Penang slangs and regional language entries.',
     requirement: 'Explore Penang state dialect entries',
@@ -2099,7 +2099,7 @@ export const ALL_BADGES: Badge[] = [
   },
   {
     id: 'penang_hokkien_boss',
-    name: 'Hokkien Boss / Kawan Penang Hokkien',
+    name: 'Hokkien Speaker / Kawan Penang Hokkien',
     category: 'State',
     description: 'Unlocked by exploring Chinese-influenced Penang Hokkien vocabulary.',
     requirement: 'Explore Chinese-influenced Hokkien entries',

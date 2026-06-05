@@ -4,7 +4,7 @@ export const TRANSLATIONS = {
   explore: {
     en: 'Explore',
     bm: 'Teroka',
-    manglish: 'Explore Lah'
+    manglish: 'Explore'
   },
   quiz: {
     en: 'Quiz',
@@ -29,17 +29,17 @@ export const TRANSLATIONS = {
   dictionaryTitle: {
     en: 'Loghat-Dex Dictionary & Map',
     bm: 'Kamus & Peta Loghat-Dex',
-    manglish: 'Big Dictionary & Map Boss'
+    manglish: 'Big Dictionary & Map'
   },
   welcomeTitle: {
     en: 'Selamat Datang / Welcome to Loghat! 🇲🇾',
     bm: 'Selamat Datang ke Loghat! 🇲🇾',
-    manglish: 'Welcome to Loghat, Boss! 🇲🇾'
+    manglish: 'Welcome to Loghat! 🇲🇾'
   },
   welcomeSubtitle: {
     en: 'Malaysia is incredibly diverse! Explore distinct languages and regional slangs from Kedah to Sabah with our Batik-Tech interactive Dialect Map. Hover or tap state nodes to inspect live vocabulary hotspots.',
     bm: 'Malaysia sangat luas kepelbagaian! Terokai bahasa dan slang serantau yang unik dari Kedah ke Sabah dengan Peta Dialek interaktif Batik-Tech kami. Layari atau ketik negeri untuk melihat kosakata aktif.',
-    manglish: 'Malaysia is very diverse, you know! Explore cool regional slangs from Kedah to Sabah with our Batik-Tech interactive map. Tap state nodes to check out slangs lah.'
+    manglish: 'Malaysia is very diverse, you know! Explore cool regional slangs from Kedah to Sabah with our Batik-Tech interactive map. Tap state nodes to check out slangs.'
   },
   mamakSurvivalBtn: {
     en: '🎒 Mamak Food Guide',
@@ -49,12 +49,12 @@ export const TRANSLATIONS = {
   playQuizBtn: {
     en: 'Play Dialect Quiz',
     bm: 'Main Kuiz Dialek',
-    manglish: 'Play Quiz Boss'
+    manglish: 'Play Quiz'
   },
   profileSection: {
     en: '1. Profile Info (Your Info)',
     bm: '1. Maklumat Profil (Info Anda)',
-    manglish: '1. My Info Boss'
+    manglish: '1. My Info'
   },
   displayNameLabel: {
     en: 'Display Nickname:',
@@ -74,7 +74,7 @@ export const TRANSLATIONS = {
   heritageCheckboxDesc: {
     en: 'Toggle this if you speak Malay native dialects. Unlocks the special "Good Netizen" badge when rating! Leaving unchecked unlocks "Good Samaritan".',
     bm: 'Tanda ini jika anda bertutur dialek asli Melayu. Membuka lencana khas "Netizen Prihatin" apabila memberi rating! Jika kosong akan mendapat "Wira Penyayang".',
-    manglish: 'Tick if you speak native Malay dialects. Unlocks special "Good Netizen" badge. Otherwise get "Good Samaritan" badge lah.'
+    manglish: 'Tick if you speak native Malay dialects. Unlocks special "Good Netizen" badge. Otherwise get "Good Samaritan" badge.'
   },
   saveProfileBtn: {
     en: 'Save Info',
@@ -84,7 +84,7 @@ export const TRANSLATIONS = {
   saveNoticeSuccess: {
     en: '✓ Local profile saved successfully!',
     bm: '✓ Maklumat profil berjaya disimpan!',
-    manglish: '✓ Info locked in already, boss!'
+    manglish: '✓ Info locked in already!'
   },
   highestRankLabel: {
     en: 'Highest Quiz Performance',
@@ -99,7 +99,7 @@ export const TRANSLATIONS = {
   noBadgesText: {
     en: 'No cultural badges unlocked yet. Rate the application or excel in the IQ quiz to earn badges!',
     bm: 'Tiada pingat budaya dibuka lagi. Berikan rating atau skor cemerlang dalam kuiz IQ untuk mendapat pingat!',
-    manglish: 'No badges yet lah. Go rate the app or play quiz first to get badges!'
+    manglish: 'No badges yet. Go rate the app or play quiz first to get badges!'
   },
   rateAppTitle: {
     en: '3. Rate The App',
@@ -124,27 +124,27 @@ export const TRANSLATIONS = {
   feedbackTitle: {
     en: '4. Feedback To Developer',
     bm: '4. Maklum Balas Ke Pemaju',
-    manglish: '4. Talk to Boss (Feedback)'
+    manglish: '4. Send Feedback'
   },
   feedbackDesc: {
     en: 'Have suggestions for local slang inputs? Or discovered bugs inside the simulator map? Send feedback directly to the preservation tech panel.',
     bm: 'Ada cadangan perkataan slang? Atau terjumpa pepijat dalam simulator? Hantar maklum balas terus kepada panel pemeliharaan kami.',
-    manglish: 'Got new slangs or found some bugs inside the map? Send details to developer now lah.'
+    manglish: 'Got new slangs or found some bugs inside the map? Send details to developer now.'
   },
   feedbackPlaceholder: {
     en: 'Write your corrections or feedback here...',
     bm: 'Tulis pembetulan atau maklum balas anda di sini...',
-    manglish: 'Write your complaints or feedback here boss...'
+    manglish: 'Write your complaints or feedback here...'
   },
   sendFeedbackBtn: {
     en: 'Send Feedback',
     bm: 'Kirim Maklum Balas',
-    manglish: 'Kirim Feedback Lah'
+    manglish: 'Kirim Feedback'
   },
   feedbackSuccessText: {
     en: '✓ Feedback submitted successfully! Terima kasih.',
     bm: '✓ Maklum balas berjaya dihantar! Terima kasih.',
-    manglish: '✓ Feedback sent, thank you boss!'
+    manglish: '✓ Feedback sent, thank you!'
   },
   statusGeneralBtn: {
     en: '💬 General Status',
@@ -164,7 +164,7 @@ export const TRANSLATIONS = {
   postBtn: {
     en: 'Kongsi / Post',
     bm: 'Kongsi / Hantar',
-    manglish: 'Post Lah'
+    manglish: 'Post'
   },
   socialFeedTitle: {
     en: 'Sembang Loghat Community Feed',
@@ -174,7 +174,7 @@ export const TRANSLATIONS = {
   socialFeedSubtitle: {
     en: 'Discuss slangs, accept quiz challenges from other users, and share cultural updates.',
     bm: 'Bincang bahasa slang, terima cabaran kuiz daripada rakan, dan kongsi perkembangan budaya.',
-    manglish: 'Talk about slangs, accept game challenges, and share updates here lah.'
+    manglish: 'Talk about slangs, accept game challenges, and share updates here.'
   },
   challengeFriendBtn: {
     en: 'Challenge a Friend',
@@ -214,7 +214,7 @@ export const TRANSLATIONS = {
   playAgainBtn: {
     en: 'Play Challenge Again',
     bm: 'Main Cabaran Semula',
-    manglish: 'Play Again Boss'
+    manglish: 'Play Again'
   },
   adImpressionText: {
     en: 'AD',
@@ -224,12 +224,12 @@ export const TRANSLATIONS = {
   profileTitle: {
     en: 'Loghat-Dex Profile & Settings 👤',
     bm: 'Profil & Tetapan Loghat-Dex 👤',
-    manglish: 'Profile & Settings Boss 👤'
+    manglish: 'Profile & Settings 👤'
   },
   profileSubtitle: {
     en: 'Manage your local identity coordinates, check earned cultural badges, and communicate directly with developer preservation charters.',
     bm: 'Urus koordinat identiti tempatan anda, semak lencana budaya yang diperoleh, dan berhubung terus dengan piagam pemeliharaan pemaju.',
-    manglish: 'Manage your identity, check badges, and talk to developer boss.'
+    manglish: 'Manage your identity, check badges, and talk to developer.'
   },
   rankAndBadgesTitle: {
     en: '2. Dialect Rank & Badges 🏆',
@@ -239,7 +239,7 @@ export const TRANSLATIONS = {
   rankLegendDesc: {
     en: 'Fuyoo! You possess flawless countryside fluency!',
     bm: 'Fuyoo! Anda mempunyai kefasihan kampung yang sempurna!',
-    manglish: 'Fuyoo! Terrific kampung slang power boss!'
+    manglish: 'Fuyoo! Terrific kampung slang power!'
   },
   rankJatiDesc: {
     en: 'Impressive knowledge of multiple state coordinates!',
@@ -249,17 +249,17 @@ export const TRANSLATIONS = {
   rankCityDesc: {
     en: 'Knows basic city terminology. Play more to claim kampung legendary status!',
     bm: 'Tahu istilah asas bandar. Main lagi untuk menuntut pangkat lagenda kampung!',
-    manglish: 'Know basic city talk only. Play more to get kampung legendary status lah!'
+    manglish: 'Know basic city talk only. Play more to get kampung legendary status!'
   },
   rankTouristDesc: {
     en: 'Untested or new explorer. Try the IQ Quiz to set your dialect rank!',
     bm: 'Penjelajah baharu yang belum diuji. Cuba Kuiz IQ untuk menetapkan pangkat dialek anda!',
-    manglish: 'New explorer. Go try quiz to see your rank first lah!'
+    manglish: 'New explorer. Go try quiz to see your rank first!'
   },
   badgeFilterAll: {
     en: 'All',
     bm: 'Semua',
-    manglish: 'All Lah'
+    manglish: 'All'
   },
   badgeFilterState: {
     en: 'State',
@@ -284,7 +284,7 @@ export const TRANSLATIONS = {
   feedbackHistoryLabel: {
     en: 'Your feedback history (saved locally):',
     bm: 'Sejarah maklum balas anda (disimpan secara tempatan):',
-    manglish: 'Feedback history boss:'
+    manglish: 'Feedback history:'
   },
   feedbackLogsSaved: {
     en: 'feedback logs saved locally',
@@ -294,7 +294,7 @@ export const TRANSLATIONS = {
   navDictionary: {
     en: 'Loghat-Dex Dictionary & Map',
     bm: 'Kamus & Peta Loghat-Dex',
-    manglish: 'Big Dict & Map Boss'
+    manglish: 'Big Dict & Map'
   },
   navQuiz: {
     en: 'Dialect IQ Quiz 🧠',
@@ -319,7 +319,7 @@ export const TRANSLATIONS = {
   navModeration: {
     en: 'Verification Queue',
     bm: 'Barisan Pengesahan',
-    manglish: 'Check Queue Boss'
+    manglish: 'Check Queue'
   },
   navSettings: {
     en: 'Settings ⚙️',
@@ -327,14 +327,14 @@ export const TRANSLATIONS = {
     manglish: 'Settings ⚙️'
   },
   appSubtitle: {
-    en: 'Different Dialects, One Heart — Preserving Malaysia’s Rich Voices',
-    bm: 'Lain Dialek, Satu Hati — Memelihara Warisan Suara Malaysia',
-    manglish: 'Different Slang, Same Heart — Preserving Malaysian Voices Lah'
+    en: 'Culturally Social. Linguistically Diverse.',
+    bm: 'Culturally Social. Linguistically Diverse.',
+    manglish: 'Culturally Social. Linguistically Diverse.'
   },
   statSlangs: {
     en: 'Slangs',
     bm: 'Slang',
-    manglish: 'Slangs Lah'
+    manglish: 'Slangs'
   },
   statPending: {
     en: 'Pending Wiki',

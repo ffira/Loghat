@@ -2331,8 +2331,8 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
               <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[5px]" />
             </div>
-            <h1 className="text-xs font-black tracking-tight italic">
-              LOGHAT <span className="text-[6px] bg-gold text-black px-1.5 py-[1px] rounded-full font-mono font-black">NATIVE</span>
+            <h1 className="text-xs font-brand tracking-wide text-white">
+              LOGHAT <span className="text-[6px] bg-gold text-black px-1.5 py-[1px] rounded-full font-mono font-black tracking-normal uppercase">NATIVE</span>
             </h1>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
@@ -2566,8 +2566,8 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
                   <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[14px]" />
                 </div>
                 <div>
-                  <h1 id="app-title-literal" className="text-2xl font-black text-[#F5F5F5] font-sans tracking-tight flex items-center gap-2 italic">
-                    LOGHAT <span className="text-[10px] bg-gold text-black px-2.5 py-0.5 rounded-full font-mono font-black uppercase tracking-wider not-italic">Beta</span>
+                  <h1 id="app-title-literal" className="text-2xl font-brand text-[#F5F5F5] tracking-wide flex items-center gap-2">
+                    LOGHAT <span className="text-[10px] bg-gold text-black px-2.5 py-0.5 rounded-full font-mono font-black uppercase tracking-wider">Beta</span>
                   </h1>
                   <p className="text-xs text-white/50 uppercase tracking-[0.08em] font-medium">
                     {t('appSubtitle', appLanguage)}

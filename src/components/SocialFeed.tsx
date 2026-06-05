@@ -345,7 +345,7 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
     
     // Auto-badge based on selected origin state
     const stateBadgeMap: Record<string, string> = {
-      'Penang': '🍜 Penang Boss',
+      'Penang': '🍜 Anak Penang',
       'Kedah': '🌾 Kedah Royalty',
       'Kelantan': '👑 Kelantan Jati',
       'Terengganu': '🐢 Pakar Ganu',
