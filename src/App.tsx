@@ -31,7 +31,9 @@ import {
   Megaphone,
   Settings,
   Shield,
-  MessageSquare
+  MessageSquare,
+  ChevronDown,
+  MoreHorizontal
 } from 'lucide-react';
 
 // Detect if running inside a Capacitor native iOS wrapper
@@ -45,8 +47,10 @@ export default function App() {
   const [ads, setAds] = useState<SponsorAd[]>([]);
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isTouristMode, setIsTouristMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<'explore' | 'game' | 'survival' | 'moderation' | 'ads' | 'settings' | 'social'>('game');
-  
+  const [activeTab, setActiveTab] = useState<'explore' | 'game' | 'survival' | 'moderation' | 'ads' | 'settings' | 'social'>('social');
+  // Controls the collapsible "More" dropdown in the desktop top navigation
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
   // First free quiz onboarding states
   const [firstQuizCompleted, setFirstQuizCompleted] = useState<boolean>(() => {
     return localStorage.getItem('loghat_first_quiz_completed') === 'true';
@@ -961,6 +965,7 @@ export default function App() {
     if (isIosSoundActive) {
       playIosTap();
     }
+    setShowMoreMenu(false); // collapse the "More" dropdown whenever a tab is chosen
     sendTelemetry('navigate_tab', { tabName: tab });
 
     tabSwitchCount.current++;
@@ -2323,18 +2328,22 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
       <div className="flex md:hidden flex-col min-h-screen text-[#F5F5F5] select-none text-left relative bg-[#06080c] pb-[64px]">
         {/* Slimmed iOS App Header */}
         <header className="px-4 pb-2.5 border-b border-white/5 bg-card/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between shrink-0" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
-          <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => changeTab('social')}
+            title={appLanguage === 'bm' ? 'Kembali ke Sembang' : 'Back to Chit Chat'}
+            className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition"
+          >
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
               <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[5px]" />
             </div>
             <h1 className="text-xs font-brand tracking-wide text-white">
               LOGHAT <span className="text-[6px] bg-gold text-black px-1.5 py-[1px] rounded-full font-mono font-black tracking-normal uppercase">NATIVE</span>
             </h1>
-          </div>
+          </button>
           <div className="flex items-center gap-1.5 shrink-0">
             {renderLanguageToggleWidget('sm')}
             <span className="text-[7px] uppercase tracking-wider font-mono font-bold bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-white/40">
-              {t(activeTab === 'survival' || activeTab === 'moderation' || activeTab === 'settings' ? 'more' : activeTab as any, appLanguage).toUpperCase()}
+              {t(['survival', 'moderation', 'settings', 'explore', 'ads'].includes(activeTab) ? 'more' : activeTab as any, appLanguage).toUpperCase()}
             </span>
           </div>
         </header>
@@ -2342,53 +2351,34 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
         {/* Scrollable Main Content Port */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 scrollbar-thin">
           
-          {/* Nested Sub-navigation for settings/survival/moderation under the "More" button in mobile */}
-          {(activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation') && (
-            <div className="flex gap-1 p-1 bg-[#121212] border border-white/5 rounded-xl mb-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  changeTab('settings');
-                }}
-                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'settings'
-                    ? 'bg-crimson text-white shadow font-extrabold'
-                    : 'text-white/45 hover:text-white'
-                }`}
-              >
-                {appLanguage === 'bm' ? '👤 Profil' : '👤 Profile'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  changeTab('survival');
-                }}
-                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'survival'
-                    ? 'bg-crimson text-white shadow font-extrabold'
-                    : 'text-white/45 hover:text-white'
-                }`}
-              >
-                {appLanguage === 'bm' ? '🎒 Panduan' : '🎒 Survival'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  changeTab('moderation');
-                }}
-                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer relative ${
-                  activeTab === 'moderation'
-                    ? 'bg-crimson text-white shadow font-extrabold'
-                    : 'text-white/45 hover:text-white'
-                }`}
-              >
-                {appLanguage === 'bm' ? '⚖️ Senarai' : '⚖️ Queue'}
-                {pendingEdits.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1 bg-gold text-black text-[7px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
-                    {pendingEdits.length}
-                  </span>
-                )}
-              </button>
+          {/* Nested Sub-navigation for every secondary section grouped under "More" in mobile */}
+          {(activeTab === 'explore' || activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation' || activeTab === 'ads') && (
+            <div className="flex gap-1 p-1 bg-[#121212] border border-white/5 rounded-xl mb-1 shrink-0 overflow-x-auto scroller-hidden">
+              {[
+                { tab: 'explore' as const, label: appLanguage === 'bm' ? '📖 Kamus' : '📖 Dict', badge: 0 },
+                { tab: 'survival' as const, label: appLanguage === 'bm' ? '🎒 Panduan' : '🎒 Survival', badge: 0 },
+                { tab: 'ads' as const, label: appLanguage === 'bm' ? '📣 Sapot' : '📣 Sponsors', badge: 0 },
+                { tab: 'moderation' as const, label: appLanguage === 'bm' ? '⚖️ Senarai' : '⚖️ Queue', badge: pendingEdits.length },
+                { tab: 'settings' as const, label: appLanguage === 'bm' ? '👤 Profil' : '👤 Profile', badge: 0 },
+              ].map((item) => (
+                <button
+                  key={item.tab}
+                  type="button"
+                  onClick={() => changeTab(item.tab)}
+                  className={`flex-1 min-w-max px-2.5 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer relative whitespace-nowrap ${
+                    activeTab === item.tab
+                      ? 'bg-crimson text-white shadow font-extrabold'
+                      : 'text-white/45 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                  {!!item.badge && item.badge > 0 && (
+                    <span className="absolute -top-1.5 -right-1 bg-gold text-black text-[7px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           )}
 
@@ -2483,16 +2473,16 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
           )}
         </div>
 
-        {/* NATIVE iOS BOTTOM UITABBAR — 5 tabs for native mobile navigation */}
+        {/* NATIVE iOS BOTTOM UITABBAR — Chit Chat & Quiz lead, everything else under "More" */}
         <nav className="bg-card/95 border-t border-white/10 backdrop-blur-xl h-[62px] pt-1.5 pb-4.5 fixed bottom-0 inset-x-0 z-30 px-1 flex justify-around items-center shrink-0">
           <button
-            onClick={() => changeTab('explore')}
+            onClick={() => changeTab('social')}
             className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
-              activeTab === 'explore' ? 'text-gold font-extrabold' : 'text-white/45'
+              activeTab === 'social' ? 'text-gold font-extrabold' : 'text-white/45'
             }`}
           >
-            <BookOpen className="w-4 h-4 mb-0.5" />
-            <span className="text-[7.5px] tracking-tight">{t('explore', appLanguage)}</span>
+            <MessageSquare className={`w-5 h-5 mb-0.5 ${activeTab === 'social' ? 'text-gold' : 'text-cyan-400'}`} />
+            <span className="text-[8px] tracking-tight">{t('social', appLanguage)}</span>
           </button>
 
           <button
@@ -2501,43 +2491,27 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
               activeTab === 'game' ? 'text-gold font-extrabold' : 'text-white/45'
             }`}
           >
-            <Award className="w-4 h-4 mb-0.5" />
-            <span className="text-[7.5px] tracking-tight">{t('quiz', appLanguage)}</span>
-          </button>
-
-          <button
-            onClick={() => changeTab('social')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
-              activeTab === 'social' ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <MessageSquare className="w-4 h-4 mb-0.5 text-cyan-400" />
-            <span className="text-[7.5px] tracking-tight">{t('social', appLanguage)}</span>
-          </button>
-
-          <button
-            onClick={() => changeTab('ads')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition relative ${
-              activeTab === 'ads' ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <Megaphone className="w-4 h-4 mb-0.5 text-crimson" />
-            <span className="text-[7.5px] tracking-tight">{t('sponsors', appLanguage)}</span>
-            <span className="absolute top-1.5 right-6 bg-crimson w-1.5 h-1.5 rounded-full" />
+            <Award className={`w-5 h-5 mb-0.5 ${activeTab === 'game' ? 'text-gold' : 'text-crimson'}`} />
+            <span className="text-[8px] tracking-tight">{t('quiz', appLanguage)}</span>
           </button>
 
           <button
             onClick={() => {
-              if (activeTab !== 'settings' && activeTab !== 'survival' && activeTab !== 'moderation') {
-                changeTab('settings');
+              if (!['explore', 'settings', 'survival', 'moderation', 'ads'].includes(activeTab)) {
+                changeTab('explore');
               }
             }}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
-              (activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation') ? 'text-gold font-extrabold' : 'text-white/45'
+            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition relative ${
+              ['explore', 'settings', 'survival', 'moderation', 'ads'].includes(activeTab) ? 'text-gold font-extrabold' : 'text-white/45'
             }`}
           >
-            <Settings className="w-4 h-4 mb-0.5" />
-            <span className="text-[7.5px] tracking-tight">{t('more', appLanguage)}</span>
+            <MoreHorizontal className="w-5 h-5 mb-0.5" />
+            <span className="text-[8px] tracking-tight">{t('more', appLanguage)}</span>
+            {pendingEdits.length > 0 && (
+              <span className="absolute top-1 right-7 bg-gold text-black text-[7px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                {pendingEdits.length}
+              </span>
+            )}
           </button>
         </nav>
       </div>
@@ -2556,20 +2530,25 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
             </div>
 
             <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3">
+              {/* Logo + name double as a "home" button back to the Chit Chat feed */}
+              <button
+                onClick={() => changeTab('social')}
+                title={appLanguage === 'bm' ? 'Kembali ke Sembang' : 'Back to Chit Chat'}
+                className="flex items-center gap-3 group cursor-pointer text-left rounded-2xl -m-1 p-1 hover:bg-white/5 transition"
+              >
                 {/* Elegant App Logo */}
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold via-crimson to-crimson p-[1.5px] shadow-lg shadow-black/40 overflow-hidden">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold via-crimson to-crimson p-[1.5px] shadow-lg shadow-black/40 overflow-hidden group-hover:scale-105 transition-transform">
                   <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[14px]" />
                 </div>
                 <div>
-                  <h1 id="app-title-literal" className="text-2xl font-brand text-[#F5F5F5] tracking-wide flex items-center gap-2">
+                  <h1 id="app-title-literal" className="text-2xl font-brand text-[#F5F5F5] tracking-wide flex items-center gap-2 group-hover:text-white transition-colors">
                     LOGHAT <span className="text-[10px] bg-gold text-black px-2.5 py-0.5 rounded-full font-mono font-black uppercase tracking-wider">Beta</span>
                   </h1>
                   <p className="text-xs text-white/50 uppercase tracking-[0.08em] font-medium">
                     {t('appSubtitle', appLanguage)}
                   </p>
                 </div>
-              </div>
+              </button>
 
               {/* Quick Dashboard Stat Counters + Language Toggle */}
               <div className="flex items-center gap-4 select-none">
@@ -2592,97 +2571,91 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
             </div>
           </header>
 
-          {/* Main Tab/Navigation Selector Segment */}
+          {/* Main Tab/Navigation Selector Segment — Chit Chat & Quiz lead, rest tucked in "More" */}
           <nav className="w-full bg-card/60 backdrop-blur border-b border-white/5 py-4 px-4 md:px-10 shrink-0">
-            <div className="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto scroller-hidden">
-              <button
-                onClick={() => changeTab('explore')}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
-                  activeTab === 'explore'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-                {t('navDictionary', appLanguage)}
-              </button>
-
-              <button
-                onClick={() => changeTab('game')}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
-                  activeTab === 'game'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
-                }`}
-              >
-                <Award className="w-4 h-4" />
-                {t('navQuiz', appLanguage)}
-              </button>
-
-              <button
-                onClick={() => changeTab('survival')}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
-                  activeTab === 'survival'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
-                }`}
-              >
-                <Coffee className="w-4 h-4" />
-                {t('navSurvival', appLanguage)}
-              </button>
-
-              <button
-                onClick={() => changeTab('ads')}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
-                  activeTab === 'ads'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
-                }`}
-              >
-                <Megaphone className="w-full sm:w-4 sm:h-4 text-gold animate-bounce" />
-                {t('navSponsors', appLanguage)}
-              </button>
-
+            <div className="max-w-6xl mx-auto flex items-center gap-2.5">
+              {/* PRIMARY: Chit Chat */}
               <button
                 onClick={() => changeTab('social')}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
                   activeTab === 'social'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
+                    ? 'bg-cyan-500/15 text-cyan-300 border-cyan-400/40 shadow-[0_0_18px_rgba(34,211,238,0.18)]'
+                    : 'text-white/70 hover:text-white hover:bg-white/5 border-white/10'
                 }`}
               >
                 <MessageSquare className="w-4 h-4 text-cyan-400" />
                 {t('navSocial', appLanguage)}
               </button>
 
+              {/* PRIMARY: Brain Test Quiz */}
               <button
-                onClick={() => changeTab('moderation')}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition relative whitespace-nowrap border ${
-                  activeTab === 'moderation'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
+                onClick={() => changeTab('game')}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
+                  activeTab === 'game'
+                    ? 'bg-crimson/15 text-crimson border-crimson/40 shadow-[0_0_18px_rgba(227,28,37,0.16)]'
+                    : 'text-white/70 hover:text-white hover:bg-white/5 border-white/10'
                 }`}
               >
-                <Sparkles className="w-4 h-4 text-gold animate-pulse" />
-                {t('navModeration', appLanguage)}
-                {pendingEdits.length > 0 && (
-                  <span className="ml-1.5 bg-gold text-black text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
-                    {pendingEdits.length}
-                  </span>
-                )}
+                <Award className="w-4 h-4 text-gold" />
+                {t('navQuiz', appLanguage)}
               </button>
 
-              <button
-                onClick={() => changeTab('settings')}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-black transition relative whitespace-nowrap border ${
-                  activeTab === 'settings'
-                    ? 'bg-crimson/10 text-crimson border-crimson/25'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
-                }`}
-              >
-                <Settings className="w-4 h-4 text-blue-400" />
-                {t('navSettings', appLanguage)}
-              </button>
+              <div className="h-6 w-px bg-white/10 mx-1 shrink-0" />
+
+              {/* COLLAPSIBLE "MORE" MENU — houses every secondary section */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowMoreMenu((v) => !v)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap border ${
+                    (showMoreMenu || ['explore', 'survival', 'ads', 'moderation', 'settings'].includes(activeTab))
+                      ? 'bg-white/10 text-white border-white/20'
+                      : 'text-white/60 hover:text-white hover:bg-white/5 border-white/10'
+                  }`}
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                  {t('more', appLanguage)}
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMoreMenu ? 'rotate-180' : ''}`} />
+                  {pendingEdits.length > 0 && (
+                    <span className="bg-gold text-black text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                      {pendingEdits.length}
+                    </span>
+                  )}
+                </button>
+
+                {showMoreMenu && (
+                  <>
+                    {/* click-away backdrop */}
+                    <div className="fixed inset-0 z-30" onClick={() => setShowMoreMenu(false)} />
+                    <div className="absolute left-0 top-full mt-2 w-60 bg-card border border-white/10 rounded-2xl shadow-2xl shadow-black/50 p-2 z-40 animate-slideDown flex flex-col gap-0.5">
+                      {[
+                        { tab: 'explore' as const, icon: <BookOpen className="w-4 h-4 text-crimson" />, label: t('navDictionary', appLanguage), badge: 0 },
+                        { tab: 'survival' as const, icon: <Coffee className="w-4 h-4 text-amber-400" />, label: t('navSurvival', appLanguage), badge: 0 },
+                        { tab: 'ads' as const, icon: <Megaphone className="w-4 h-4 text-gold" />, label: t('navSponsors', appLanguage), badge: 0 },
+                        { tab: 'moderation' as const, icon: <Sparkles className="w-4 h-4 text-gold" />, label: t('navModeration', appLanguage), badge: pendingEdits.length },
+                        { tab: 'settings' as const, icon: <Settings className="w-4 h-4 text-blue-400" />, label: t('navSettings', appLanguage), badge: 0 },
+                      ].map((item) => (
+                        <button
+                          key={item.tab}
+                          onClick={() => changeTab(item.tab)}
+                          className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition text-left ${
+                            activeTab === item.tab
+                              ? 'bg-crimson/10 text-crimson'
+                              : 'text-white/70 hover:text-white hover:bg-white/5'
+                          }`}
+                        >
+                          {item.icon}
+                          <span className="flex-1">{item.label}</span>
+                          {!!item.badge && item.badge > 0 && (
+                            <span className="bg-gold text-black text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </nav>
 

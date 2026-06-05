@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   MessageSquare, 
   Heart, 
@@ -153,12 +153,191 @@ const INITIAL_POSTS: Post[] = [
       }
     ],
     timestamp: '4h ago'
+  },
+  {
+    id: 'post-5',
+    author: 'Amoi Penang 🍜',
+    avatar: '🍜',
+    rank: 'Anak Jati',
+    badge: '🍜 Anak Penang',
+    text: 'Korang tau tak, dalam loghat Penang "lui" tu maksud duit? Tadi cek pi pasaq, tauke tanya "u u lui bo?" — confused kejap mamat sebelah cek yang baru pindah dari KL 😂 Sharing is caring, jom belajar loghat utara!',
+    likes: 73,
+    isLikedByUser: false,
+    type: 'slang_share',
+    comments: [
+      {
+        id: 'c-5',
+        author: 'KL Slicker 🏢',
+        avatar: '🏢',
+        text: 'Hahaha betul! First time dengar memang blur. Tapi best la belajar slang baru macam ni.',
+        timestamp: '20m ago'
+      },
+      {
+        id: 'c-5b',
+        author: 'Otai Kedah 🌾',
+        avatar: '🌾',
+        text: 'Kat Kedah pun guna "lui" jugak. Loghat utara memang power!',
+        timestamp: '12m ago'
+      }
+    ],
+    timestamp: '35m ago'
+  },
+  {
+    id: 'post-6',
+    author: 'Cikgu BM Online ✏️',
+    avatar: '✏️',
+    rank: 'Anak Jati',
+    badge: '📚 Penjaga Bahasa',
+    text: 'Reminder harian: bahasa kita kaya sangat! Satu perkataan "comel" ada banyak versi — "gomoi" (Kelantan), "chomey" (utara), "comel" (standard). Jom kongsi versi negeri korang kat bawah! 👇',
+    likes: 134,
+    isLikedByUser: false,
+    type: 'general',
+    comments: [
+      {
+        id: 'c-6',
+        author: 'Den Anak N9 🐃',
+        avatar: '🐃',
+        text: 'Kek N9 kami sebut "comey" jugak. Den suko tengok thread macam ni!',
+        timestamp: '50m ago'
+      }
+    ],
+    timestamp: '1h ago'
+  },
+  {
+    id: 'post-7',
+    author: 'Abang Grab JB 🐅',
+    avatar: '🐅',
+    rank: 'Budak City',
+    badge: '🐅 Budak Johor',
+    text: 'Baru je score 80% Dialect IQ Johor! Sikit lagi nak masuk Legend. Sapa nak teman grind sama-sama malam ni? Jom challenge, menang dapat bragging rights je pun haha 🔥',
+    likes: 47,
+    isLikedByUser: false,
+    type: 'challenge',
+    challengeDetails: {
+      challengerScore: 80,
+      stateFocus: 'Johor',
+      challengerName: 'Abang Grab JB'
+    },
+    comments: [],
+    timestamp: '1h ago'
+  },
+  {
+    id: 'post-8',
+    author: 'Sarawakian Sejati 🐦',
+    avatar: '🐦',
+    rank: 'Anak Jati',
+    badge: '🐦 Otai Sarawak',
+    text: 'Kamek baru tambah 5 patah perkataan Iban kek Loghat-Dex. Mun kitak orang ada masa, tolong upvote sikit supaya boleh verified. Kita sama-sama jaga bahasa Sarawak ah! 🙏',
+    likes: 91,
+    isLikedByUser: false,
+    type: 'slang_share',
+    comments: [
+      {
+        id: 'c-8',
+        author: 'Sumandak Sabah ⛰️',
+        avatar: '⛰️',
+        text: 'Sudah sia upvote bah! Kamurang Sarawak memang rajin tambah kamus.',
+        timestamp: '40m ago'
+      }
+    ],
+    timestamp: '2h ago'
+  },
+  {
+    id: 'post-9',
+    author: 'Mok Ganu Pantai 🐢',
+    avatar: '🐢',
+    rank: 'Budak City',
+    badge: '🐢 Pakar Ganu',
+    text: 'Starang baroh! Ore Ganu mana sini? Cuba teka — "molek" tu maksud ape? Hadiah bragging rights je la untuk sapa jawab dulu 😄',
+    likes: 38,
+    isLikedByUser: false,
+    type: 'general',
+    comments: [
+      {
+        id: 'c-9',
+        author: 'Budak Kelate Jati 👑',
+        avatar: '👑',
+        text: 'Molek tu "cantik / elok" kan? Kelate ngan Ganu memang rapat slang dia.',
+        timestamp: '1h ago'
+      },
+      {
+        id: 'c-9b',
+        author: 'Mok Ganu Pantai 🐢',
+        avatar: '🐢',
+        text: 'Betui! Laju demo jawab. 🏆',
+        timestamp: '55m ago'
+      }
+    ],
+    timestamp: '3h ago'
+  },
+  {
+    id: 'post-10',
+    author: 'Adik Baru Join 🌱',
+    avatar: '🌱',
+    rank: 'Tourist',
+    badge: '🌱 Loghat Novice',
+    text: 'Hi semua! Baru je download app ni, best gila boleh belajar slang setiap negeri. Ada tak sesiapa boleh recommend slang mana paling senang nak start? 😊',
+    likes: 62,
+    isLikedByUser: false,
+    type: 'general',
+    comments: [
+      {
+        id: 'c-10',
+        author: 'Otai Kedah 🌾',
+        avatar: '🌾',
+        text: 'Welcome! Start ngan loghat utara, senang sebab banyak orang guna. Hang boleh la 😄',
+        timestamp: '15m ago'
+      },
+      {
+        id: 'c-10b',
+        author: 'KL Slicker 🏢',
+        avatar: '🏢',
+        text: 'Selamat datang bro! Cuba Manglish dulu kalau baru start, paling relate haha.',
+        timestamp: '8m ago'
+      }
+    ],
+    timestamp: '45m ago'
+  },
+  {
+    id: 'post-11',
+    author: 'Preservationist Bot 🤖',
+    avatar: '🤖',
+    rank: 'Loghat System',
+    badge: '🛡️ Preserver',
+    text: '📊 MILESTONE: Komuniti Loghat baru sahaja mencecah 2,200+ slang terkumpul dalam Loghat-Dex! Terima kasih kepada semua 14,000+ rakyat yang menyumbang. Jom teruskan pelihara bahasa kita! 🇲🇾',
+    likes: 218,
+    isLikedByUser: false,
+    type: 'slang_share',
+    comments: [],
+    timestamp: '5h ago'
+  },
+  {
+    id: 'post-12',
+    author: 'Mat Pahang Sungai 🐘',
+    avatar: '🐘',
+    rank: 'Budak City',
+    badge: '🐘 Otai Pahang',
+    text: 'Kome orang Pahang mana? Jom kumpul kat thread ni. Slang kite selalu orang lupe, padahal "kome" (kamu) tu unik gak kan? Jom buktikan Pahang pun ada loghat power! 💪',
+    likes: 29,
+    isLikedByUser: false,
+    type: 'general',
+    comments: [
+      {
+        id: 'c-12',
+        author: 'Adik Baru Join 🌱',
+        avatar: '🌱',
+        text: 'Owh patutla member aku Temerloh selalu sebut "kome"! Baru faham haha.',
+        timestamp: '30m ago'
+      }
+    ],
+    timestamp: '6h ago'
   }
 ];
 
 export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userProfile, appLanguage = 'manglish' }: SocialFeedProps) {
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [loading, setLoading] = useState(false);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -437,6 +616,29 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
     }
   };
 
+  // Invite friends to play — uses the native share sheet, falls back to clipboard copy
+  const handleInviteFriends = async () => {
+    const shareUrl = (typeof window !== 'undefined' && window.location?.origin && !window.location.origin.startsWith('capacitor://'))
+      ? window.location.origin
+      : 'https://loghatku.my';
+    const shareText = appLanguage === 'bm'
+      ? 'Jom main Loghat! Uji IQ dialek Malaysia anda & pelihara bahasa kita. 🇲🇾'
+      : appLanguage === 'manglish'
+      ? 'Come play Loghat lah! Test your Malaysian dialect IQ & preserve our slang. 🇲🇾'
+      : 'Come play Loghat! Test your Malaysian dialect IQ & help preserve our slang. 🇲🇾';
+    try {
+      if (typeof navigator !== 'undefined' && (navigator as any).share) {
+        await (navigator as any).share({ title: 'Loghat', text: shareText, url: shareUrl });
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        alert(appLanguage === 'bm' ? '🔗 Pautan jemputan disalin! Kongsi dengan kawan-kawan.' : '🔗 Invite link copied! Share it with your friends.');
+      }
+      unlockBadgeId('social_inviter');
+    } catch (err) {
+      // user cancelled the share sheet — no action needed
+    }
+  };
+
   // Filter posts
   const filteredPosts = posts.filter(post => {
     if (filter === 'all') return true;
@@ -465,6 +667,43 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
         </div>
       </div>
 
+      {/* QUIZ INVITE CTA — always visible call-to-action to jump into the Brain Test Quiz */}
+      <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-[#241f12] via-[#1a160d] to-[#120f08] p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 shadow-lg shadow-amber-950/10">
+        <div className="absolute -top-6 -right-6 w-28 h-28 bg-gradient-to-br from-gold/20 to-transparent rounded-full pointer-events-none" />
+        <div className="shrink-0 h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
+          <Award className="w-6 h-6 text-gold" />
+        </div>
+        <div className="flex-1 text-center sm:text-left z-10">
+          <h3 className="text-sm font-black text-gold flex items-center justify-center sm:justify-start gap-1.5">
+            {appLanguage === 'bm' ? 'Uji IQ Dialek anda!' : appLanguage === 'manglish' ? 'Test your Dialect IQ lah!' : 'Test your Dialect IQ!'}
+          </h3>
+          <p className="text-[10px] sm:text-2xs text-white/65 leading-relaxed mt-0.5">
+            {appLanguage === 'bm'
+              ? 'Main Brain Test Quiz, kumpul markah & cabar kawan-kawan anda. Sertai ribuan rakyat yang sedang bermain!'
+              : appLanguage === 'manglish'
+              ? 'Play the Brain Test Quiz, collect score & challenge your friends. Thousands already playing one!'
+              : 'Play the Brain Test Quiz, earn your score & challenge your friends. Join thousands already playing!'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 z-10 w-full sm:w-auto shrink-0">
+          <button
+            onClick={() => { unlockBadgeId('social_challenger'); onAcceptChallenge?.(userExtProfile.originState || 'Penang'); }}
+            className="flex-1 sm:flex-none px-5 py-2.5 bg-gradient-to-r from-gold to-yellow-600 hover:from-gold/90 hover:to-yellow-700 text-black font-black text-2xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5 shadow cursor-pointer active:scale-95"
+          >
+            <Award className="w-4 h-4" />
+            {appLanguage === 'bm' ? 'Main Sekarang' : appLanguage === 'manglish' ? 'Play Now' : 'Play Quiz'}
+          </button>
+          <button
+            onClick={handleInviteFriends}
+            title={appLanguage === 'bm' ? 'Jemput kawan' : 'Invite friends'}
+            className="px-3.5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 text-white/80 font-black text-2xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+          >
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">{appLanguage === 'bm' ? 'Jemput' : 'Invite'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Community Activity Pulse Ticker */}
       <div className="bg-[#0b101b] border border-cyan-500/15 rounded-xl p-2.5 flex items-center gap-2 overflow-hidden shadow-inner text-left animate-slideDown">
         <span className="flex h-2 w-2 relative shrink-0">
@@ -480,19 +719,53 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
       </div>
 
       {/* COMPOSER / POST CREATOR */}
-      <form onSubmit={handleCreatePost} className="bg-[#0b101b] border border-cyan-500/15 rounded-2xl p-4 flex flex-col gap-3 hover:border-cyan-500/30 transition-all duration-300">
+      <form onSubmit={handleCreatePost} className="bg-[#0b101b] border border-cyan-500/20 rounded-2xl p-4 flex flex-col gap-3 hover:border-cyan-500/40 focus-within:border-cyan-500/50 transition-all duration-300 shadow-lg shadow-cyan-950/10">
+        {/* Friendly invitation heading */}
+        <div className="flex items-center gap-2 text-left">
+          <Smile className="w-4 h-4 text-cyan-400 shrink-0" />
+          <h3 className="text-xs font-black text-white/90">
+            {appLanguage === 'bm'
+              ? `Hai ${userExtProfile.displayName}, apa loghat hari ni? 👋`
+              : appLanguage === 'manglish'
+              ? `Hi ${userExtProfile.displayName}, what's the loghat today? 👋`
+              : `Hi ${userExtProfile.displayName}, what's on your mind today? 👋`}
+          </h3>
+        </div>
+
         <div className="flex gap-2.5 items-start">
-          <div className="h-8 w-8 rounded-full bg-[#060910] border border-white/10 flex items-center justify-center text-sm shrink-0">
+          <div className="h-9 w-9 rounded-full bg-[#060910] border border-cyan-500/20 flex items-center justify-center text-sm shrink-0">
             {userExtProfile.heritageState === 'Malay' ? '🇲🇾' : '🥤'}
           </div>
           <div className="flex-1 min-w-0">
             <textarea
+              ref={composerRef}
               value={newPostText}
               onChange={(e) => setNewPostText(e.target.value)}
-              placeholder={appLanguage === 'bm' ? 'Kongsi slang menarik atau cabar komuniti...' : appLanguage === 'manglish' ? 'Share slangs or challenge friends lah...' : 'Share interesting slangs or challenge the community...'}
+              placeholder={appLanguage === 'bm' ? 'Kongsi slang menarik, tanya soalan, atau cabar komuniti...' : appLanguage === 'manglish' ? 'Share slangs, ask question, or challenge friends lah...' : 'Share an interesting slang, ask a question, or challenge the community...'}
               rows={isInsideSimulator ? 2 : 3}
-              className="w-full bg-[#060910] border border-white/5 text-white placeholder:text-white/35 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500 resize-none"
+              className="w-full bg-[#060910] border border-white/10 text-white placeholder:text-white/35 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-cyan-500 resize-none"
             />
+            {/* Quick-start prompt chips — one tap to begin writing */}
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {(appLanguage === 'bm'
+                ? ['💬 Slang kegemaran saya ialah…', '❓ Apa maksud…', '🔥 Saya cabar sesiapa…', '📍 Di negeri saya, kami sebut…']
+                : appLanguage === 'manglish'
+                ? ['💬 My favourite slang is…', '❓ What does … mean ah?', '🔥 I challenge anyone…', '📍 In my state, we say…']
+                : ['💬 My favourite slang is…', '❓ What does … mean?', '🔥 I challenge anyone…', '📍 In my hometown, we say…']
+              ).map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => {
+                    setNewPostText((prev) => (prev ? prev : prompt.replace(/^[^\s]+\s/, '') + ' '));
+                    composerRef.current?.focus();
+                  }}
+                  className="px-2.5 py-1 rounded-full text-[9px] font-bold bg-cyan-500/5 hover:bg-cyan-500/15 text-cyan-300/90 border border-cyan-500/15 hover:border-cyan-500/35 transition cursor-pointer"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
