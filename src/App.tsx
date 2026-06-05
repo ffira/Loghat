@@ -25,37 +25,19 @@ import {
   BookOpen,
   Award,
   Coffee,
-  Share2,
   Sparkles,
-  HelpCircle,
   CheckCircle,
   Info,
   Megaphone,
-  Smartphone,
-  Globe,
-  Wifi,
-  Battery,
   Settings,
-  MapPin,
-  CreditCard,
-  ChevronRight,
-  Sun,
-  Moon,
-  Volume2,
-  Bell,
-  Activity,
-  Compass,
-  CornerDownRight,
-  Plus,
   Shield,
-  Lock,
-  Mail,
-  Phone,
-  Sliders,
-  X,
-  Check,
   MessageSquare
 } from 'lucide-react';
+
+// Detect if running inside a Capacitor native iOS wrapper
+const API_BASE = window.location.origin.startsWith('capacitor://')
+  ? 'https://loghatku.my'
+  : '';
 
 export default function App() {
   const [entries, setEntries] = useState<DialectEntry[]>([]);
@@ -164,34 +146,8 @@ export default function App() {
     topState: string;
   } | null>(null);
 
-  // iOS Simulator State Management
-  const isSimulatorActive = false;
+  // Audio feedback toggle
   const [isIosSoundActive, setIsIosSoundActive] = useState(true);
-  const [isIosDarkMode, setIsIosDarkMode] = useState(true);
-  const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
-  const [isHomeScreenActive, setIsHomeScreenActive] = useState(false);
-  const [isAppBooting, setIsAppBooting] = useState(false);
-  const [isFlashlightOn, setIsFlashlightOn] = useState(false);
-  const [iosBrightness, setIosBrightness] = useState(95);
-  const [iosVolume, setIosVolume] = useState(85);
-  const [islandNotification, setIslandNotification] = useState<{
-    icon: string;
-    title: string;
-    subtitle: string;
-    highlight?: boolean;
-  } | null>(null);
-
-  // Home Screen wallpaper list index
-  const [activeWallpaperIdx, setActiveWallpaperIdx] = useState(0);
-  const wallpapers = [
-    'bg-gradient-to-tr from-indigo-950 via-slate-900 to-rose-950',
-    'bg-gradient-to-tr from-amber-950 via-red-950 to-zinc-950',
-    'bg-gradient-to-br from-[#0d3b66] via-[#000814] to-[#f4d35e]/20',
-    'bg-gradient-to-tr from-[#2d1b00] via-[#140e00] to-[#000000] border-gold/25 shadow-[inset_0_0_50px_rgba(212,175,55,0.05)]', // Golden Horizon (Ultra Premium)
-  ];
-
-  // Active Clock
-  const [timeStr, setTimeStr] = useState('11:15 AM');
 
   // Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -322,52 +278,21 @@ export default function App() {
     }
   }, [isPushBannerVisible]);
 
-  // Update real-time system clock
-  useEffect(() => {
-    const updateTime = () => {
-      const d = new Date();
-      let hours = d.getHours();
-      const minutes = d.getMinutes();
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12; // 0 hour is converted to 12
-      const minsStr = minutes < 10 ? '0' + minutes : minutes;
-      setTimeStr(`${hours}:${minsStr} ${ampm}`);
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
-  // Custom Toast with sound trigger & Dynamic Island support
+
+  // Custom Toast with sound trigger
   const triggerToast = (msg: string, type: 'success' | 'info' = 'success') => {
     setToastMessage(msg);
     setToastType(type);
 
     if (isIosSoundActive) {
-      if (type === 'success') {
-        playIosChime();
-      } else {
-        playIosChime();
-      }
+      playIosChime();
     }
 
-    // Direct Dynamic Island alert trigger!
-    setIslandNotification({
-      icon: type === 'success' ? '✨' : '⚡',
-      title: type === 'success' ? 'LOGHAT CONSENSUS' : 'SYSTEM NOTIFICATION',
-      subtitle: msg,
-      highlight: true
-    });
-
-    // Dismiss processes
+    // Dismiss toast
     setTimeout(() => {
       setToastMessage(null);
     }, 4000);
-
-    setTimeout(() => {
-      setIslandNotification(null);
-    }, 4500);
   };
 
   // Periodic background telemetry daemon
@@ -381,20 +306,9 @@ export default function App() {
       metadata,
       timestamp: new Date().toISOString(),
       locale: 'ms-MY',
-      platform: isSimulatorActive ? 'Simulated iOS (Celcom 5G)' : 'Web Viewports'
+      platform: 'Web'
     };
     console.log('[Telemetry Service] Triggered telemetry backup:', payload);
-    
-    // Simulate telemetry synchronization directly on the iPhone camera notch / Dynamic Island!
-    setIslandNotification({
-      icon: '📡',
-      title: 'TELEMETRY SYNCED',
-      subtitle: `${actionName.toUpperCase()} logged for analysis`,
-      highlight: false
-    });
-    setTimeout(() => {
-      setIslandNotification(null);
-    }, 2800);
 
     try {
       await fetch('/api/telemetry', {
@@ -421,7 +335,7 @@ export default function App() {
         unlockedBadgeIds: getUnlockedBadgeIds()
       };
 
-      await fetch('/api/users/sync', {
+      await fetch(`${API_BASE}/api/users/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -439,7 +353,7 @@ export default function App() {
     if (!token) return;
 
     try {
-      const res = await fetch('/api/users/profile', {
+      const res = await fetch(`${API_BASE}/api/users/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -486,7 +400,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
@@ -540,7 +454,7 @@ export default function App() {
         ? { googleId: `g-oauth-${Date.now()}`, email: mockEmail, nickname: mockName }
         : { appleId: `a-oauth-${Date.now()}`, email: mockEmail, nickname: mockName };
 
-      const res = await fetch(endpoint, {
+      const res = await fetch(API_BASE + endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload)
@@ -651,13 +565,12 @@ export default function App() {
   const selectPremiumTier = async (tier: 'none' | 'adfree' | 'ultra') => {
     const isPremium = tier !== 'none';
     
-    // Check if on web desktop (non-simulator wrapper) and buying a paid plan
     const token = localStorage.getItem('loghat_jwt_token');
     
-    if (isPremium && !isSimulatorActive && token) {
+    if (isPremium && token) {
       triggerToast('Redirecting to secure Stripe checkout portal...', 'info');
       try {
-        const res = await fetch('/api/payment/create-checkout-session', {
+        const res = await fetch(`${API_BASE}/api/payment/create-checkout-session`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -681,7 +594,7 @@ export default function App() {
       }
     }
 
-    if (isPremium && !token && !isSimulatorActive) {
+    if (isPremium && !token) {
       triggerToast('Please register or log in first to purchase a subscription!', 'info');
       setForcedOnboarding(true);
       setActiveTab('game');
@@ -939,18 +852,6 @@ export default function App() {
     }
   };
 
-  // Simulator Booting Sequence
-  const launchIosApp = () => {
-    if (isIosSoundActive) {
-      playIosTap();
-    }
-    setIsHomeScreenActive(false);
-    setIsAppBooting(true);
-    setTimeout(() => {
-      setIsAppBooting(false);
-      triggerToast('Welcome to Loghat Mobile! App launched.', 'success');
-    }, 1800);
-  };
 
   // Active stat indicators
   const entryCountsByState: Record<string, number> = {};
@@ -1106,38 +1007,7 @@ export default function App() {
     );
   };
 
-  // Full side panel ad tower for web desktop (right side of phone frame)
-  const renderSideAdPanel = () => {
-    if (userProfile.isPremiumUser) return null;
-    return (
-      <div className="w-full lg:max-w-[220px] xl:max-w-[250px] hidden lg:flex flex-col gap-3 z-10 shrink-0">
-        {/* Header */}
-        <div className="bg-card border border-white/10 rounded-xl p-3 text-center">
-          <p className="text-[8px] uppercase tracking-[0.25em] font-mono text-white/30 font-bold">Sponsored</p>
-        </div>
 
-        {/* Ad slots — renders 3 rotating smart ads */}
-        {renderSmartAdBanner('sidebar', 'side-ad-1')}
-        {renderSmartAdBanner('sidebar', 'side-ad-2')}
-        {renderSmartAdBanner('sidebar', 'side-ad-3')}
-
-        {/* Premium upsell CTA */}
-        <button
-          onClick={() => setShowSubscriptionModal(true)}
-          className="bg-gradient-to-r from-gold/10 to-amber-900/10 border border-gold/20 rounded-xl p-3 text-center hover:border-gold/40 transition cursor-pointer"
-        >
-          <p className="text-[9px] font-black text-gold uppercase tracking-wide">👑 Remove All Ads</p>
-          <p className="text-[8px] text-white/40 mt-0.5">From RM4.90 lifetime</p>
-        </button>
-      </div>
-    );
-  };
-
-  // Inline mid-content ad for iOS (inside the scrollable area)
-  const renderInlineMidAd = (key?: string) => {
-    if (userProfile.isPremiumUser) return null;
-    return renderSmartAdBanner('mid', key);
-  };
 
   // Render initial Privacy Consent Gate Screen
   const renderPrivacyConsentScreen = (isSimulatorLayout: boolean) => {
@@ -1447,12 +1317,7 @@ export default function App() {
                       setIsEmailCodeSent(true);
                       triggerToast('✨ Firebase Auth code generated! See top Island notifications.', 'success');
                       
-                      setIslandNotification({
-                        icon: '✉️',
-                        title: 'FIREBASE AUTH',
-                        subtitle: 'OTP sent to email. Use code: 4092',
-                        highlight: true
-                      });
+
                     }}
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
@@ -1498,7 +1363,7 @@ export default function App() {
 
                         // Register on Backend database!
                         try {
-                          const res = await fetch('/api/auth/register', {
+                          const res = await fetch(`${API_BASE}/api/auth/register`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1580,12 +1445,7 @@ export default function App() {
                       setIsPhoneCodeSent(true);
                       triggerToast('⚡ SMS OTP code generated!', 'success');
                       
-                      setIslandNotification({
-                        icon: '📲',
-                        title: 'SMS SENT',
-                        subtitle: 'SMS code dispatched. Use code: 8153',
-                        highlight: true
-                      });
+
                     }}
                     className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gold text-2xs font-extrabold uppercase rounded-xl transition cursor-pointer"
                   >
@@ -2223,280 +2083,7 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
     );
   };
 
-  // Render Cupertino elements inside the Main Simulated App View
-  const renderAppMainContainer = () => {
-    return (
-      <div className="flex flex-col h-full bg-[#0d0f12] text-[#F5F5F5] select-none text-left relative">
-        {/* Slimmed iOS App Header — saves vertical space */}
-        <div className="px-3 pt-2 pb-1.5 border-b border-white/5 bg-card/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
-              <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[5px]" />
-            </div>
-            <h1 className="text-xs font-black tracking-tight italic">
-              LOGHAT <span className="text-[6px] bg-gold text-black px-1 py-[1px] rounded-full font-mono font-black">BETA</span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {renderLanguageToggleWidget()}
-            <span className="text-[7px] uppercase tracking-wider font-mono font-bold bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-white/40">
-              {t(activeTab as any, appLanguage).toUpperCase()}
-            </span>
-          </div>
-        </div>
 
-        {/* Scrollable Main Content Port — reduced padding for simulator */}
-        <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 scrollbar-thin">
-          
-          {/* Welcome Screen Element (Explore Tab only inside device) */}
-          {activeTab === 'explore' && !selectedState && (
-            <div className="bg-gradient-to-br from-card to-[#121212] border border-white/10 p-4 rounded-xl flex flex-col gap-3 relative overflow-hidden text-left">
-              <div className="space-y-1">
-                <h4 className="text-xs font-extrabold text-gold flex items-center gap-1">
-                  {t('welcomeTitle', appLanguage)}
-                </h4>
-                <p className="text-[10px] text-white/70 leading-normal">
-                  {t('welcomeSubtitle', appLanguage)}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <button
-                  onClick={() => {
-                    setIsTouristMode(true);
-                    changeTab('survival');
-                  }}
-                  className="px-2.5 py-1.5 bg-[#1a1a1a] border border-white/10 hover:border-gold/45 text-gold text-[9px] font-bold rounded-lg transition cursor-pointer"
-                >
-                  {t('mamakSurvivalBtn', appLanguage)}
-                </button>
-                <button
-                  onClick={() => changeTab('game')}
-                  className="px-2.5 py-1.5 bg-crimson label text-white text-[9px] font-bold rounded-lg transition cursor-pointer"
-                >
-                  {t('playQuizBtn', appLanguage)}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ACTIVE PORTAL TAB VIEWS */}
-          {activeTab === 'explore' && (
-            <div className="space-y-4">
-              {/* Interactive map display */}
-              <div className="bg-card/40 border border-white/5 rounded-xl p-1.5">
-                <MalaysiaMap
-                  onSelectState={(st) => {
-                    setSelectedState(st);
-                    trackEvent('word_view', { state: st });
-                    if (isIosSoundActive) playIosTap();
-                  }}
-                  selectedState={selectedState}
-                  entryCountsByState={entryCountsByState}
-                  isInsideSimulator={true}
-                />
-              </div>
-
-              {/* General Loghat dictionary */}
-              <DialectDex
-                entries={entries}
-                selectedState={selectedState}
-                onUpvoteEntry={handleUpvoteEntry}
-                onAddEntry={handleAddEntryProposal}
-                onEditProposal={handleCorrectionProposal}
-                sponsorAds={ads}
-                isInsideSimulator={true}
-                appLanguage={appLanguage}
-              />
-            </div>
-          )}
-
-          {activeTab === 'game' && (
-            <div className="transition-all">
-              {renderGameTabContent(true)}
-            </div>
-          )}
-
-          {/* Smart inline ad after game tab (iOS) */}
-          {activeTab === 'game' && renderInlineMidAd('ios-post-game-ad')}
-
-          {/* Smart inline sponsor card between sections (iOS) — uses local Ad Cards first, then third-party fallback */}
-          {activeTab !== 'ads' && activeTab !== 'settings' && activeTab !== 'game' && renderInlineMidAd('ios-inline-ad')}
-
-          {/* Nested Sub-navigation for settings/survival/moderation under the "More" button in simulator */}
-          {(activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation') && (
-            <div className="flex gap-1 p-1 bg-[#121212] border border-white/5 rounded-xl mb-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  changeTab('settings');
-                  if (isIosSoundActive) playIosTap();
-                }}
-                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'settings'
-                    ? 'bg-crimson text-white shadow font-extrabold'
-                    : 'text-white/45 hover:text-white'
-                }`}
-              >
-                {appLanguage === 'bm' ? '👤 Profil' : '👤 Profile'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  changeTab('survival');
-                  if (isIosSoundActive) playIosTap();
-                }}
-                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'survival'
-                    ? 'bg-crimson text-white shadow font-extrabold'
-                    : 'text-white/45 hover:text-white'
-                }`}
-              >
-                {appLanguage === 'bm' ? '🎒 Panduan' : '🎒 Survival'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  changeTab('moderation');
-                  if (isIosSoundActive) playIosTap();
-                }}
-                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer relative ${
-                  activeTab === 'moderation'
-                    ? 'bg-crimson text-white shadow font-extrabold'
-                    : 'text-white/45 hover:text-white'
-                }`}
-              >
-                {appLanguage === 'bm' ? '⚖️ Senarai' : '⚖️ Queue'}
-                {pendingEdits.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1 bg-gold text-black text-[7px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
-                    {pendingEdits.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          )}
-
-          {activeTab === 'social' && (
-            <div className="animate-fadeIn">
-              <SocialFeed
-                isInsideSimulator={true}
-                userProfile={userProfile}
-                appLanguage={appLanguage}
-                onAcceptChallenge={(stateFocus) => {
-                  setSelectedState(stateFocus);
-                  changeTab('game');
-                  if (isIosSoundActive) playIosTap();
-                }}
-              />
-            </div>
-          )}
-
-          {activeTab === 'survival' && (
-            <div>
-              <TouristSurvival
-                isTouristMode={isTouristMode}
-                onToggleMode={(val) => {
-                  setIsTouristMode(val);
-                  if (isIosSoundActive) playIosTap();
-                }}
-                isInsideSimulator={true}
-              />
-            </div>
-          )}
-
-          {activeTab === 'moderation' && (
-            <div>
-              <CrowdsourceQueue
-                pendingEdits={pendingEdits}
-                onVoteSah={handleVoteSah}
-                onRejectEdit={handleRejectEdit}
-                isInsideSimulator={true}
-              />
-            </div>
-          )}
-
-          {activeTab === 'ads' && (
-            <div>
-              {/* Dynamic Comfort approved Ad banner showing on the board too */}
-              <BazarSponsors
-                ads={ads}
-                onAddAd={handleAddAd}
-                onReactAd={handleReactAd}
-                isInsideSimulator={true}
-              />
-            </div>
-          )}
-
-          {activeTab === 'settings' && (
-            <div className="animate-fadeIn">
-              <SettingsTab
-                userProfile={userProfile}
-                onUpdateUserProfile={updateProfile}
-                isInsideSimulator={true}
-                appLanguage={appLanguage}
-                onOpenWrapped={handleOpenWrapped}
-              />
-            </div>
-          )}
-        </div>
-
-        {renderBottomAdmobBanner()}
-
-        {/* NATIVE iOS BOTTOM UITABBAR — 5 tabs for better fit at 393px */}
-        <div className="bg-card/95 border-t border-white/10 backdrop-blur-xl h-[62px] pt-1 pb-3 shrink-0 relative z-30 px-1 flex justify-around items-center">
-          <button
-            onClick={() => changeTab('explore')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
-              activeTab === 'explore' ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <BookOpen className="w-4 h-4 mb-0.5" />
-            <span className="text-[7px] tracking-tight">{t('explore', appLanguage)}</span>
-          </button>
-
-          <button
-            onClick={() => changeTab('game')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
-              activeTab === 'game' ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <Award className="w-4 h-4 mb-0.5" />
-            <span className="text-[7px] tracking-tight">{t('quiz', appLanguage)}</span>
-          </button>
-
-          <button
-            onClick={() => changeTab('social')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
-              activeTab === 'social' ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <MessageSquare className="w-4 h-4 mb-0.5 text-cyan-400" />
-            <span className="text-[7px] tracking-tight">{t('social', appLanguage)}</span>
-          </button>
-
-          <button
-            onClick={() => changeTab('ads')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition relative ${
-              activeTab === 'ads' ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <Megaphone className="w-4 h-4 mb-0.5 text-crimson" />
-            <span className="text-[7px] tracking-tight">{t('sponsors', appLanguage)}</span>
-            <span className="absolute top-0.5 right-2 bg-crimson w-1.5 h-1.5 rounded-full" />
-          </button>
-
-          <button
-            onClick={() => changeTab('settings')}
-            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition relative ${
-              (activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation') ? 'text-gold font-extrabold' : 'text-white/45'
-            }`}
-          >
-            <Sliders className="w-4 h-4 mb-0.5" />
-            <span className="text-[7px] tracking-tight">{t('more', appLanguage)}</span>
-          </button>
-        </div>
-      </div>
-    );
-  };
 
   const renderPushNotificationBanner = () => {
     if (!isPushBannerVisible) return null;
