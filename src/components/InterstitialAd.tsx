@@ -59,7 +59,7 @@ export default function InterstitialAd({ ads, isVisible, onDismiss, dismissDelay
   return (
     <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
       {/* Close button area */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute right-4 z-10" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
         {canDismiss ? (
           <button
             onClick={handleDismiss}
@@ -75,7 +75,7 @@ export default function InterstitialAd({ ads, isVisible, onDismiss, dismissDelay
       </div>
 
       {/* Ad label */}
-      <div className="absolute top-4 left-4">
+      <div className="absolute left-4" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
         <span className="bg-amber-400 text-black text-[8px] font-black px-2 py-1 rounded uppercase tracking-wider flex items-center gap-1">
           <Sparkles className="w-2.5 h-2.5" /> SPONSORED
         </span>

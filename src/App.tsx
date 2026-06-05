@@ -1900,9 +1900,9 @@ export default function App() {
 
             </div>
 
-            {/* Simulated Payment Notice */}
+            {/* Payment Notice */}
             <div className="p-3.5 bg-white/5 border border-white/10 rounded-xl text-2xs text-white/60 leading-normal text-left">
-              💡 <b>Developer Sandbox Notice:</b> Clicking the buttons above will instantly simulate a successful Google Play / App Store checkout and activate the subscription features. No real money is spent in this sandbox!
+              💡 <b>Secure Payment:</b> Subscription payments are processed securely via Stripe. Your purchase will unlock premium features instantly.
             </div>
           </div>
         </div>
@@ -2271,8 +2271,233 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
         </div>
       )}
 
+      {/* ------------------------------------------------------------- */}
+      {/* CASE A: MOBILE LAYOUT WITH FIXED BOTTOM NAVIGATION            */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex md:hidden flex-col min-h-screen text-[#F5F5F5] select-none text-left relative bg-[#06080c] pb-[64px]">
+        {/* Slimmed iOS App Header */}
+        <header className="px-4 pt-4 pb-2.5 border-b border-white/5 bg-card/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
+              <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[5px]" />
+            </div>
+            <h1 className="text-xs font-black tracking-tight italic">
+              LOGHAT <span className="text-[6px] bg-gold text-black px-1.5 py-[1px] rounded-full font-mono font-black">NATIVE</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {renderLanguageToggleWidget('sm')}
+            <span className="text-[7px] uppercase tracking-wider font-mono font-bold bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-white/40">
+              {t(activeTab === 'survival' || activeTab === 'moderation' || activeTab === 'settings' ? 'more' : activeTab as any, appLanguage).toUpperCase()}
+            </span>
+          </div>
+        </header>
+
+        {/* Scrollable Main Content Port */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 scrollbar-thin">
+          
+          {/* Nested Sub-navigation for settings/survival/moderation under the "More" button in mobile */}
+          {(activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation') && (
+            <div className="flex gap-1 p-1 bg-[#121212] border border-white/5 rounded-xl mb-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  changeTab('settings');
+                }}
+                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer ${
+                  activeTab === 'settings'
+                    ? 'bg-crimson text-white shadow font-extrabold'
+                    : 'text-white/45 hover:text-white'
+                }`}
+              >
+                {appLanguage === 'bm' ? '👤 Profil' : '👤 Profile'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  changeTab('survival');
+                }}
+                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer ${
+                  activeTab === 'survival'
+                    ? 'bg-crimson text-white shadow font-extrabold'
+                    : 'text-white/45 hover:text-white'
+                }`}
+              >
+                {appLanguage === 'bm' ? '🎒 Panduan' : '🎒 Survival'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  changeTab('moderation');
+                }}
+                className={`flex-1 py-1.5 text-[9px] font-bold rounded-lg transition-all cursor-pointer relative ${
+                  activeTab === 'moderation'
+                    ? 'bg-crimson text-white shadow font-extrabold'
+                    : 'text-white/45 hover:text-white'
+                }`}
+              >
+                {appLanguage === 'bm' ? '⚖️ Senarai' : '⚖️ Queue'}
+                {pendingEdits.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1 bg-gold text-black text-[7px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                    {pendingEdits.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* ACTIVE PORTAL TAB VIEWS */}
+          {activeTab === 'explore' && (
+            <div className="space-y-4">
+              {/* Interactive map display */}
+              <div className="bg-card/40 border border-white/5 rounded-xl p-1.5">
+                <MalaysiaMap
+                  onSelectState={(st) => {
+                    setSelectedState(st);
+                    trackEvent('word_view', { state: st });
+                  }}
+                  selectedState={selectedState}
+                  entryCountsByState={entryCountsByState}
+                />
+              </div>
+
+              {/* General Loghat dictionary */}
+              <DialectDex
+                entries={entries}
+                selectedState={selectedState}
+                onUpvoteEntry={handleUpvoteEntry}
+                onAddEntry={handleAddEntryProposal}
+                onEditProposal={handleCorrectionProposal}
+                appLanguage={appLanguage}
+              />
+            </div>
+          )}
+
+          {activeTab === 'game' && (
+            <div className="transition-all">
+              {renderGameTabContent(false)}
+            </div>
+          )}
+
+          {activeTab === 'social' && (
+            <div className="animate-fadeIn">
+              <SocialFeed
+                isInsideSimulator={false}
+                userProfile={userProfile}
+                appLanguage={appLanguage}
+                onAcceptChallenge={(stateFocus) => {
+                  setSelectedState(stateFocus);
+                  changeTab('game');
+                }}
+              />
+            </div>
+          )}
+
+          {activeTab === 'survival' && (
+            <div>
+              <TouristSurvival
+                isTouristMode={isTouristMode}
+                onToggleMode={setIsTouristMode}
+              />
+            </div>
+          )}
+
+          {activeTab === 'moderation' && (
+            <div>
+              <CrowdsourceQueue
+                pendingEdits={pendingEdits}
+                onVoteSah={handleVoteSah}
+                onRejectEdit={handleRejectEdit}
+                isInsideSimulator={false}
+              />
+            </div>
+          )}
+
+          {activeTab === 'ads' && (
+            <div>
+              <BazarSponsors
+                ads={ads}
+                onAddAd={handleAddAd}
+                onReactAd={handleReactAd}
+                isInsideSimulator={false}
+              />
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="animate-fadeIn">
+              <SettingsTab
+                userProfile={userProfile}
+                onUpdateUserProfile={updateProfile}
+                isInsideSimulator={false}
+                appLanguage={appLanguage}
+                onOpenWrapped={handleOpenWrapped}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* NATIVE iOS BOTTOM UITABBAR — 5 tabs for native mobile navigation */}
+        <nav className="bg-card/95 border-t border-white/10 backdrop-blur-xl h-[62px] pt-1.5 pb-4.5 fixed bottom-0 inset-x-0 z-30 px-1 flex justify-around items-center shrink-0">
+          <button
+            onClick={() => changeTab('explore')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
+              activeTab === 'explore' ? 'text-gold font-extrabold' : 'text-white/45'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 mb-0.5" />
+            <span className="text-[7.5px] tracking-tight">{t('explore', appLanguage)}</span>
+          </button>
+
+          <button
+            onClick={() => changeTab('game')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
+              activeTab === 'game' ? 'text-gold font-extrabold' : 'text-white/45'
+            }`}
+          >
+            <Award className="w-4 h-4 mb-0.5" />
+            <span className="text-[7.5px] tracking-tight">{t('quiz', appLanguage)}</span>
+          </button>
+
+          <button
+            onClick={() => changeTab('social')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
+              activeTab === 'social' ? 'text-gold font-extrabold' : 'text-white/45'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4 mb-0.5 text-cyan-400" />
+            <span className="text-[7.5px] tracking-tight">{t('social', appLanguage)}</span>
+          </button>
+
+          <button
+            onClick={() => changeTab('ads')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition relative ${
+              activeTab === 'ads' ? 'text-gold font-extrabold' : 'text-white/45'
+            }`}
+          >
+            <Megaphone className="w-4 h-4 mb-0.5 text-crimson" />
+            <span className="text-[7.5px] tracking-tight">{t('sponsors', appLanguage)}</span>
+            <span className="absolute top-1.5 right-6 bg-crimson w-1.5 h-1.5 rounded-full" />
+          </button>
+
+          <button
+            onClick={() => {
+              if (activeTab !== 'settings' && activeTab !== 'survival' && activeTab !== 'moderation') {
+                changeTab('settings');
+              }
+            }}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-0.5 transition ${
+              (activeTab === 'settings' || activeTab === 'survival' || activeTab === 'moderation') ? 'text-gold font-extrabold' : 'text-white/45'
+            }`}
+          >
+            <Settings className="w-4 h-4 mb-0.5" />
+            <span className="text-[7.5px] tracking-tight">{t('more', appLanguage)}</span>
+          </button>
+        </nav>
+      </div>
+
       {/* CASE B: NORMAL HIGH-CONTRAST FULL-SCREEN WEBSITE VIEWPORT */}
-      <div className="flex-1 flex flex-col justify-between">
+      <div className="hidden md:flex flex-1 flex-col justify-between">
           {/* Modern Malaysia "Batik Tech" Aesthetic Top Header Banner */}
           <header className="relative w-full border-b border-white/10 bg-card/85 backdrop-blur-md pt-6 pb-6 px-4 md:px-10 overflow-hidden shrink-0 select-none">
             {/* Abstract vector flowers simulating traditional malaysian hibiscus patterns */}
@@ -2603,7 +2828,7 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
                 Data Preferences (CCPA/GDPR/Telemetry)
               </button>
             </p>
-            <p className="mt-2 text-white/15">Preserving unique regional vernaculars of Southeast Asia • Developed as a Sandbox App</p>
+            <p className="mt-2 text-white/15">Preserving unique regional vernaculars of Southeast Asia</p>
           </footer>
         </div>
 
