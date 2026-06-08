@@ -386,7 +386,8 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
         'Perak': 'perak_pioneer',
         'Pahang': 'pahang_jungle',
         'Melaka': 'melaka_nyonya',
-        'Perlis': 'perlis_ranger'
+        'Perlis': 'perlis_ranger',
+        'Labuan': 'labuan_islander'
       };
       const match = stateMap[originState];
       if (match) {
@@ -551,6 +552,7 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
                 <option value="Pahang">Pahang</option>
                 <option value="Melaka">Melaka</option>
                 <option value="Perlis">Perlis</option>
+                <option value="Labuan">Labuan</option>
               </select>
             </div>
 
@@ -820,9 +822,9 @@ export default function SettingsTab({ onUpdateUserProfile, userProfile, isInside
           </div>
 
           <div className="bg-[#121212]/30 border border-white/5 rounded-xl p-4 flex flex-col items-center gap-4 text-center">
-            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-gold via-crimson to-crimson p-[1.5px] shadow-lg shadow-black/40 overflow-hidden group">
-              <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[14px]" />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+            <div className="relative w-20 h-20 rounded-2xl overflow-hidden group">
+              <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-contain drop-shadow-[0_2px_5px_rgba(0,0,0,0.16)]" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 rounded-2xl">
                 <Sparkles className="w-6 h-6 text-gold animate-pulse" />
               </div>
             </div>

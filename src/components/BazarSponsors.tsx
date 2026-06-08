@@ -148,7 +148,7 @@ export default function BazarSponsors({ ads, onAddAd, onReactAd, isInsideSimulat
                 onChange={(e) => setStateOrigin(e.target.value)}
                 className="bg-card border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-gold"
               >
-                {['Kuala Lumpur', 'Penang', 'Kedah', 'Kelantan', 'Terengganu', 'Sabah', 'Sarawak', 'Johor', 'Selangor', 'Negeri Sembilan', 'Pahang', 'Melaka', 'Perlis'].map((st) => (
+                {['Kuala Lumpur', 'Penang', 'Kedah', 'Perak', 'Kelantan', 'Terengganu', 'Sabah', 'Sarawak', 'Labuan', 'Johor', 'Selangor', 'Negeri Sembilan', 'Pahang', 'Melaka', 'Perlis'].map((st) => (
                   <option key={st} value={st} className="bg-[#121212]">
                     {st}
                   </option>

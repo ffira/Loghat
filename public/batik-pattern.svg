@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <!-- Subtle Malaysian motif tile: bunga raya (national hibiscus) + songket diamonds.
+       Faint warm-gold line art, sparse spacing — a quiet cultural texture. -->
+  <g fill="none" stroke="#9a6a1e" stroke-width="2.4" stroke-opacity="0.16">
+    <!-- Hibiscus: five petals around a center -->
+    <g transform="rotate(0 150 150)"><ellipse cx="150" cy="100" rx="22" ry="46"/></g>
+    <g transform="rotate(72 150 150)"><ellipse cx="150" cy="100" rx="22" ry="46"/></g>
+    <g transform="rotate(144 150 150)"><ellipse cx="150" cy="100" rx="22" ry="46"/></g>
+    <g transform="rotate(216 150 150)"><ellipse cx="150" cy="100" rx="22" ry="46"/></g>
+    <g transform="rotate(288 150 150)"><ellipse cx="150" cy="100" rx="22" ry="46"/></g>
+    <circle cx="150" cy="150" r="13"/>
+    <!-- Long hibiscus stamen flourish -->
+    <path d="M150 150 q26 -24 40 -44"/>
+    <circle cx="192" cy="104" r="3.2" stroke-opacity="0.14"/>
+  </g>
+  <!-- Songket diamonds at the corners (tile to form a lattice between flowers) -->
+  <g fill="none" stroke="#9a6a1e" stroke-width="2" stroke-opacity="0.13">
+    <rect x="-10" y="-10" width="20" height="20" transform="rotate(45 0 0)"/>
+    <rect x="290" y="-10" width="20" height="20" transform="rotate(45 300 0)"/>
+    <rect x="-10" y="290" width="20" height="20" transform="rotate(45 0 300)"/>
+    <rect x="290" y="290" width="20" height="20" transform="rotate(45 300 300)"/>
+    <circle cx="150" cy="8" r="2.4"/>
+    <circle cx="8" cy="150" r="2.4"/>
+    <circle cx="292" cy="150" r="2.4"/>
+    <circle cx="150" cy="292" r="2.4"/>
+  </g>
+</svg>

@@ -58,10 +58,12 @@ const STATES_LIST = [
   'Sarawak',
   'Johor',
   'Kuala Lumpur',
+  'Selangor',
   'Perak',
   'Perlis',
   'Pahang',
-  'Melaka'
+  'Melaka',
+  'Labuan'
 ];
 
 export default function DialectIQGame({ ads = INITIAL_SPONSOR_ADS, isSimulatorLayout = false, onChallengeFriend, appLanguage = 'manglish', premiumTier = 'none', onOpenSubscriptionModal, onQuizComplete }: DialectIQGameProps) {

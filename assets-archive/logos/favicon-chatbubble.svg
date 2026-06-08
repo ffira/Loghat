@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Loghat">
+  <defs>
+    <linearGradient id="favBg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD93B"/>
+      <stop offset="0.5" stop-color="#FF9F1C"/>
+      <stop offset="1" stop-color="#E31C25"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="64" height="64" rx="15" fill="url(#favBg)"/>
+  <!-- Bold chat bubble, sized for clarity at 16px -->
+  <path d="M14 13 H50 a8 8 0 0 1 8 8 V37 a8 8 0 0 1 -8 8 H29 l-8 8 v-8 h-7 a8 8 0 0 1 -8 -8 V21 a8 8 0 0 1 8 -8 Z" fill="#ffffff"/>
+  <circle cx="23" cy="29" r="4" fill="#E31C25"/>
+  <circle cx="32" cy="29" r="4" fill="#119DB8"/>
+  <circle cx="41" cy="29" r="4" fill="#F59E0B"/>
+</svg>

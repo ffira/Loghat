@@ -12,6 +12,8 @@ import BazarSponsors from './components/BazarSponsors';
 import SettingsTab from './components/SettingsTab';
 import InterstitialAd from './components/InterstitialAd';
 import SocialFeed from './components/SocialFeed';
+import FeedbackButton from './components/FeedbackButton';
+import VersionToggle from './components/VersionToggle';
 import { Language, t } from './utils/i18n';
 
 // Audio feedback helper
@@ -2150,8 +2152,8 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
           }
         }}
       >
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold via-crimson to-crimson p-[1px] shrink-0 overflow-hidden">
-          <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[7px]" />
+        <div className="w-8 h-8 shrink-0">
+          <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex-1 min-w-0 text-left">
           <h4 className="text-xs font-black text-gold tracking-tight">{pushNotification.title}</h4>
@@ -2186,10 +2188,10 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
 
             <div className="flex justify-between items-center z-10 border-b border-white/5 pb-3">
               <div className="flex items-center gap-1.5 flex-row">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
-                  <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[7px]" />
+                <div className="w-8 h-8">
+                  <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-contain" />
                 </div>
-                <h1 className="text-sm font-black text-white italic tracking-tight">LOGHAT 🇲🇾</h1>
+                <h1 className="text-sm font-brand text-white tracking-tight">LOGHAT 🇲🇾</h1>
               </div>
               <span className="text-[7.5px] uppercase font-mono font-black text-gold border border-gold/30 px-2 py-0.5 rounded bg-gold/5 tracking-wider">Wrapped 2026</span>
             </div>
@@ -2333,8 +2335,8 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
             title={appLanguage === 'bm' ? 'Kembali ke Sembang' : 'Back to Chit Chat'}
             className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition"
           >
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-crimson p-[1px] overflow-hidden">
-              <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[5px]" />
+            <div className="w-6 h-6">
+              <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)]" />
             </div>
             <h1 className="text-xs font-brand tracking-wide text-white">
               LOGHAT <span className="text-[6px] bg-gold text-black px-1.5 py-[1px] rounded-full font-mono font-black tracking-normal uppercase">NATIVE</span>
@@ -2537,8 +2539,8 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
                 className="flex items-center gap-3 group cursor-pointer text-left rounded-2xl -m-1 p-1 hover:bg-white/5 transition"
               >
                 {/* Elegant App Logo */}
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold via-crimson to-crimson p-[1.5px] shadow-lg shadow-black/40 overflow-hidden group-hover:scale-105 transition-transform">
-                  <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-cover rounded-[14px]" />
+                <div className="w-12 h-12 group-hover:scale-105 transition-transform">
+                  <img src="/logo.png" alt="Loghat Logo" className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.16)]" />
                 </div>
                 <div>
                   <h1 id="app-title-literal" className="text-2xl font-brand text-[#F5F5F5] tracking-wide flex items-center gap-2 group-hover:text-white transition-colors">
@@ -2572,7 +2574,7 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
           </header>
 
           {/* Main Tab/Navigation Selector Segment — Chit Chat & Quiz lead, rest tucked in "More" */}
-          <nav className="w-full bg-card/60 backdrop-blur border-b border-white/5 py-4 px-4 md:px-10 shrink-0">
+          <nav className="relative z-50 w-full bg-card/90 backdrop-blur border-b border-white/5 py-4 px-4 md:px-10 shrink-0">
             <div className="max-w-6xl mx-auto flex items-center gap-2.5">
               {/* PRIMARY: Chit Chat */}
               <button
@@ -2865,6 +2867,10 @@ Under standard GDPR Article 7 and CCPA sections, you hold total sovereignty:
         dismissDelay={3}
         context="tab_switch"
       />
+
+      {/* Global floating feedback button + UI version toggle */}
+      <FeedbackButton appLanguage={appLanguage} />
+      <VersionToggle appLanguage={appLanguage} />
     </div>
   );
 }

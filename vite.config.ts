@@ -11,6 +11,11 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    // Only treat the real app entry as a dependency-scan entry point.
+    // (Prevents Vite from trying to parse the prebuilt loghat-standalone.html.)
+    optimizeDeps: {
+      entries: ['index.html'],
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify — file watching is disabled to prevent flickering during agent edits.

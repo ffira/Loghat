@@ -536,7 +536,8 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
       'Perak': '🪙 Perak Pioneer',
       'Pahang': '🐘 Otai Pahang',
       'Melaka': '🏰 Melaka Otai',
-      'Perlis': '🥭 Budak Perlis'
+      'Perlis': '🥭 Budak Perlis',
+      'Labuan': '🏝️ Anak Labuan'
     };
     
     const origin = userExtProfile.originState || 'Penang';
@@ -668,9 +669,9 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
       </div>
 
       {/* QUIZ INVITE CTA — always visible call-to-action to jump into the Brain Test Quiz */}
-      <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-[#241f12] via-[#1a160d] to-[#120f08] p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 shadow-lg shadow-amber-950/10">
+      <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-[#241f12] via-[#1a160d] to-[#120f08] animate-sheen p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 shadow-lg shadow-amber-950/10">
         <div className="absolute -top-6 -right-6 w-28 h-28 bg-gradient-to-br from-gold/20 to-transparent rounded-full pointer-events-none" />
-        <div className="shrink-0 h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
+        <div className="shrink-0 h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center animate-float">
           <Award className="w-6 h-6 text-gold" />
         </div>
         <div className="flex-1 text-center sm:text-left z-10">
@@ -818,6 +819,7 @@ export default function SocialFeed({ isInsideSimulator, onAcceptChallenge, userP
                 <option value="Pahang">Pahang</option>
                 <option value="Melaka">Melaka</option>
                 <option value="Perlis">Perlis</option>
+                <option value="Labuan">Labuan</option>
               </select>
             </div>
           )}

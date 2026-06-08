@@ -2,9 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <script>
+      // Apply saved UI version before paint (default = new light theme) to avoid a flash.
+      (function () {
+        try {
+          var t = localStorage.getItem('loghat_theme');
+          document.documentElement.classList.add(t === 'dark' ? 'theme-dark' : 'theme-light');
+        } catch (e) {
+          document.documentElement.classList.add('theme-light');
+        }
+      })();
+    </script>
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f1ea" />
     <title>Loghat</title>
   </head>
   <body>

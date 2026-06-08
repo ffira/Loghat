@@ -33,8 +33,10 @@ export default function MalaysiaMap({ onSelectState, selectedState, entryCountsB
     { name: 'Negeri Sembilan', short: 'N9', region: 'Peninsular', x: 32, y: 70, hasActivity: true, hotWord: 'Ekau' },
     { name: 'Melaka', short: 'MLK', region: 'Peninsular', x: 37, y: 76, hasActivity: true, hotWord: 'Hawau' },
     { name: 'Johor', short: 'JHR', region: 'Peninsular', x: 47, y: 84, hasActivity: true, hotWord: 'Kepeng' },
+    { name: 'Perak', short: 'PRK', region: 'Peninsular', x: 15, y: 42, hasActivity: true, hotWord: 'Teq' },
     { name: 'Sarawak', short: 'SWK', region: 'East Malaysia', x: 75, y: 64, hasActivity: true, hotWord: 'Kamek' },
-    { name: 'Sabah', short: 'SBH', region: 'East Malaysia', x: 91, y: 26, hasActivity: true, hotWord: 'Bah' }
+    { name: 'Sabah', short: 'SBH', region: 'East Malaysia', x: 91, y: 26, hasActivity: true, hotWord: 'Bah' },
+    { name: 'Labuan', short: 'LBN', region: 'East Malaysia', x: 81, y: 33, hasActivity: true, hotWord: 'Damit' }
   ];
 
   // Zoom/pan state using viewBox manipulation (no CSS transform conflicts)
@@ -374,12 +376,12 @@ export default function MalaysiaMap({ onSelectState, selectedState, entryCountsB
           }}
         >
           {/* Separator between West and East Malaysia */}
-          <line x1="651" y1="0" x2="651" y2="450" stroke="rgba(255,255,255,0.05)" strokeDasharray="6 4" />
-          <text x="660" y="20" fill="rgba(255,255,255,0.15)" fontSize="11" fontFamily="monospace" letterSpacing="1">South China Sea</text>
+          <line x1="651" y1="0" x2="651" y2="450" stroke="var(--map-sep)" strokeDasharray="6 4" />
+          <text x="660" y="20" fill="var(--map-sea)" fontSize="11" fontFamily="monospace" letterSpacing="1">South China Sea</text>
 
           {/* Region Labels */}
-          <text x="20" y="20" fill="rgba(245,245,245,0.2)" fontSize="11" fontFamily="monospace" letterSpacing="2" textAnchor="start">PENINSULAR MALAYSIA</text>
-          <text x="1030" y="20" fill="rgba(245,245,245,0.2)" fontSize="11" fontFamily="monospace" letterSpacing="2" textAnchor="end">EAST MALAYSIA</text>
+          <text x="20" y="20" fill="var(--map-label)" fontSize="11" fontFamily="monospace" letterSpacing="2" textAnchor="start">PENINSULAR MALAYSIA</text>
+          <text x="1030" y="20" fill="var(--map-label)" fontSize="11" fontFamily="monospace" letterSpacing="2" textAnchor="end">EAST MALAYSIA</text>
 
           {/* Peninsular Malaysia coastline */}
           <path
@@ -403,8 +405,8 @@ export default function MalaysiaMap({ onSelectState, selectedState, entryCountsB
                C 100,110 95,95 100,80
                C 102,70 90,60 85,50
                C 78,43 85,35 90,30 Z"
-            fill={isPeninsularSelected ? "rgba(251, 191, 36, 0.08)" : "rgba(251, 191, 36, 0.03)"}
-            stroke={isPeninsularSelected ? "#FFD700" : "rgba(255, 215, 0, 0.4)"}
+            fill={isPeninsularSelected ? "var(--map-fill-strong)" : "var(--map-fill)"}
+            stroke={isPeninsularSelected ? "var(--map-coast-strong)" : "var(--map-coast)"}
             strokeWidth={isPeninsularSelected ? "1.6" : "0.8"}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -444,8 +446,8 @@ export default function MalaysiaMap({ onSelectState, selectedState, entryCountsB
                C 885,245 865,275 825,295 
                C 785,315 760,365 725,385 
                C 705,395 680,390 640,370 Z"
-            fill={isEastSelected ? "rgba(251, 191, 36, 0.08)" : "rgba(251, 191, 36, 0.03)"}
-            stroke={isEastSelected ? "#FFD700" : "rgba(255, 215, 0, 0.4)"}
+            fill={isEastSelected ? "var(--map-fill-strong)" : "var(--map-fill)"}
+            stroke={isEastSelected ? "var(--map-coast-strong)" : "var(--map-coast)"}
             strokeWidth={isEastSelected ? "1.6" : "0.8"}
             strokeLinecap="round"
             strokeLinejoin="round"

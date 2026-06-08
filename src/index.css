@@ -1,23 +1,98 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+/* ============================================================================
+   TWO THEMES IN ONE
+   Default (no class / .theme-dark)  = ORIGINAL dark "black-on-black" UI.
+   html.theme-light                  = NEW light & cheerful UI (the default we ship).
+   The light theme is delivered entirely via token overrides + a scoped utility
+   layer, so flipping the <html> class swaps the whole look with zero re-render.
+   ============================================================================ */
 @theme {
   --color-gold: #FFD700;
   --color-gold-dark: #B8860B;
   --color-crimson: #E31C25;
+  /* Dark (original) surface tokens — the default */
   --color-dark: #121212;
   --color-card: #1A1A1A;
   --color-interior: #161616;
 }
 
+/* Shared light-theme palette + ink ramp (only consumed inside .theme-light rules) */
+:root {
+  --surface-page: #e7edf7;   /* soft light-blue page */
+  --surface-card: #ffffff;
+  --surface-2:    #eef2fa;
+  --surface-3:    #e1e8f3;
+  /* Higher-contrast ink ramp for strong readability on the light-blue bg */
+  --ink:        #15171c;
+  --ink-2:      #1f242c;
+  --ink-muted:  #424b5b;
+  --ink-faint:  #646c7d;
+  --line:       rgba(24, 26, 35, 0.16);
+  --line-soft:  rgba(24, 26, 35, 0.09);
+  --gold-ink:   #8a6700;     /* readable gold for TEXT on light */
+  --tint-warm:  #fbf4e4;
+  --tint-warm2: #fff8ec;
+  --tint-cool:  #eef3fb;
+  --tint-cool2: #f6f9fe;
+
+  /* Map colours — default = dark theme values */
+  --map-label: rgba(245,245,245,0.2);
+  --map-sep:   rgba(255,255,255,0.05);
+  --map-sea:   rgba(255,255,255,0.15);
+  --map-coast: rgba(255,215,0,0.4);
+  --map-coast-strong: #FFD700;
+  --map-fill:  rgba(251,191,36,0.03);
+  --map-fill-strong: rgba(251,191,36,0.08);
+}
+
+/* Light theme: flip the design tokens + map colours */
+html.theme-light {
+  --color-dark: #e7edf7;
+  --color-card: #ffffff;
+  --color-interior: #eef2fa;
+
+  --map-label: rgba(28,30,38,0.5);
+  --map-sep:   rgba(28,30,38,0.13);
+  --map-sea:   rgba(28,30,38,0.42);
+  --map-coast: rgba(150,103,0,0.6);
+  --map-coast-strong: #B07d00;
+  --map-fill:  rgba(150,103,0,0.07);
+  --map-fill-strong: rgba(251,191,36,0.16);
+}
+
+/* Brand wordmark font — Cinzel (old/dark) vs Outfit (new/light) */
 .font-brand {
   font-family: 'Cinzel', serif;
 }
+html.theme-light .font-brand {
+  font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
 
+/* ---- Body backgrounds ---- */
 body {
+  font-family: ui-sans-serif, system-ui, sans-serif;
   background-color: #121212;
   color: #F5F5F5;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+html.theme-light body {
+  color: var(--ink);
+  /* Cheerful soft Malaysian-tint canvas: faint bunga-raya/songket batik beneath
+     gold + cyan + crimson + emerald colour blooms over a light-blue page. */
+  background-color: var(--surface-page);
+  background-image:
+    url('/batik-pattern.svg'),
+    radial-gradient(circle at 14% 12%, rgba(255, 200, 0, 0.26), transparent 42%),
+    radial-gradient(circle at 86% 8%,  rgba(34, 180, 230, 0.22), transparent 44%),
+    radial-gradient(circle at 78% 88%, rgba(227, 28, 37, 0.14), transparent 48%),
+    radial-gradient(circle at 8% 90%,  rgba(16, 185, 129, 0.16), transparent 46%);
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 300px 300px, auto, auto, auto, auto;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-attachment: fixed;
 }
 
 .bg-natural-grid {
@@ -25,61 +100,234 @@ body {
   background-image: radial-gradient(circle at 2px 2px, #333 1px, transparent 0);
   background-size: 24px 24px;
 }
-
-/* Custom scrollbar to keep it sleek and clean */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+html.theme-light .bg-natural-grid {
+  background-color: var(--surface-page);
+  background-image: radial-gradient(circle at 2px 2px, rgba(28,28,40,0.06) 1px, transparent 0);
 }
 
-::-webkit-scrollbar-track {
-  background: #121212;
+/* Scrollbar — dark default, light when themed */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #FFD700; }
+html.theme-light ::-webkit-scrollbar-track { background: transparent; }
+html.theme-light ::-webkit-scrollbar-thumb { background: #c2c9d6; }
+html.theme-light ::-webkit-scrollbar-thumb:hover { background: var(--color-gold-dark); }
+
+/* ============================================================================
+   LIGHT-THEME UTILITY OVERRIDES — scoped under html.theme-light so the original
+   dark theme is untouched. Attribute selectors remap hard-coded dark utilities.
+   ============================================================================ */
+@layer utilities {
+  html.theme-light {
+
+    /* ---- Surfaces: component roots / deepest darks → white card ---- */
+    [class~="bg-[#000000]"],
+    [class~="bg-[#05080e]"],
+    [class~="bg-[#06040a]"],
+    [class~="bg-[#06080c]"],
+    [class~="bg-[#07090e]"],
+    [class~="bg-[#090b10]"],
+    [class~="bg-[#0b0a12]"],
+    [class~="bg-[#0d0909]"],
+    [class~="bg-[#0d0a07]"],
+    [class~="bg-[#0d1015]"],
+    [class~="bg-[#0f0b18]"],
+    [class~="bg-black"] {
+      background-color: var(--surface-card) !important;
+    }
+
+    /* ---- Surfaces: mid darks (panels, inputs, comment boxes) → light recess ---- */
+    [class~="bg-[#121212]"],
+    [class~="bg-[#121212]/80"], [class~="bg-[#121212]/75"], [class~="bg-[#121212]/70"],
+    [class~="bg-[#121212]/50"], [class~="bg-[#121212]/40"], [class~="bg-[#121212]/30"],
+    [class~="bg-[#11141d]"],
+    [class~="bg-[#121622]"], [class~="bg-[#121622]/60"],
+    [class~="bg-[#12141c]"], [class~="bg-[#12141c]/90"], [class~="bg-[#12141c]/70"], [class~="bg-[#12141c]/50"],
+    [class~="bg-[#141212]"],
+    [class~="bg-[#14120f]"], [class~="bg-[#14120f]/90"],
+    [class~="bg-[#151821]"],
+    [class~="bg-[#151926]"],
+    [class~="bg-[#191d29]"],
+    [class~="bg-[#1a0f12]"],
+    [class~="bg-[#1a2334]"],
+    [class~="bg-[#1b1b1b]"],
+    [class~="bg-[#1c2230]"],
+    [class~="bg-[#1d273a]"],
+    [class~="bg-[#1f1f1f]"],
+    [class~="bg-[#222]"],
+    [class~="bg-[#0b101b]"],
+    [class~="bg-[#060910]"],
+    [class~="bg-[#0d121c]"], [class~="bg-[#0d121c]/80"],
+    [class~="bg-[#182030]"] {
+      background-color: var(--surface-2) !important;
+    }
+
+    [class~="hover:bg-[#121212]"]:hover,
+    [class~="hover:bg-[#1c2230]"]:hover,
+    [class~="hover:bg-[#1b1b1b]"]:hover,
+    [class~="hover:bg-[#1a2334]"]:hover,
+    [class~="hover:bg-[#1d273a]"]:hover {
+      background-color: var(--surface-3) !important;
+    }
+
+    /* ---- Gradient heroes: warm → cream tint ---- */
+    [class~="from-[#241f12]"],
+    [class~="from-[#241f17]"],
+    [class~="from-[#2a241a]"],
+    [class~="from-[#1c160b]"] { --tw-gradient-from: var(--tint-warm) var(--tw-gradient-from-position) !important; }
+    [class~="via-[#1a160d]"]   { --tw-gradient-via:  var(--tint-warm2) var(--tw-gradient-via-position) !important; }
+    [class~="to-[#120f08]"]    { --tw-gradient-to:   var(--surface-card) var(--tw-gradient-to-position) !important; }
+
+    /* ---- Gradient heroes: cool → cool tint ---- */
+    [class~="from-[#0c1424]"],
+    [class~="from-[#111624]"],
+    [class~="from-[#1a1a2e]"] { --tw-gradient-from: var(--tint-cool) var(--tw-gradient-from-position) !important; }
+    [class~="via-[#090b10]"]   { --tw-gradient-via:  var(--tint-cool2) var(--tw-gradient-via-position) !important; }
+    [class~="to-[#16213e]"],
+    [class~="to-[#0f3460]"],
+    [class~="to-[#080d15]"],
+    [class~="to-[#182030]"],
+    [class~="to-[#1d273a]"],
+    [class~="to-[#040609]"],
+    [class~="to-[#12141c]"],
+    [class~="to-[#1a1a2e]"]   { --tw-gradient-to:   var(--surface-card) var(--tw-gradient-to-position) !important; }
+
+    /* ---- Primary / whitish text → ink ---- */
+    [class~="text-white"],
+    [class~="text-[#F5F5F5]"],
+    [class~="text-[#f2f2f2]"],
+    [class~="hover:text-white"]:hover,
+    [class~="group-hover:text-white"] {
+      color: var(--ink) !important;
+    }
+    .group:hover [class~="group-hover:text-white"] { color: var(--ink) !important; }
+
+    /* ---- Muted white-alpha + off-white-alpha text → tiered ink ---- */
+    [class~="text-white/95"], [class~="text-white/90"], [class~="text-white/85"],
+    [class~="text-white/80"], [class~="text-white/75"], [class~="text-white/70"],
+    [class~="text-[#F5F5F5]/90"], [class~="text-[#F5F5F5]/80"], [class~="text-[#F5F5F5]/75"],
+    [class~="text-[#F5F5F5]/70"] { color: var(--ink-2) !important; }
+    [class~="text-white/65"], [class~="text-white/60"], [class~="text-white/55"],
+    [class~="text-white/50"], [class~="text-white/45"], [class~="text-white/40"],
+    [class~="text-[#F5F5F5]/60"] { color: var(--ink-muted) !important; }
+    [class~="text-white/35"], [class~="text-white/30"], [class~="text-white/25"],
+    [class~="text-white/20"], [class~="text-white/15"], [class~="text-white/10"] { color: var(--ink-faint) !important; }
+
+    /* ---- Gray hex text → muted ink ---- */
+    [class~="text-[#aaa]"] { color: var(--ink-muted) !important; }
+    [class~="text-[#999]"] { color: #4b5563 !important; }
+    [class~="text-[#888]"] { color: #555e6b !important; }
+    [class~="text-[#777]"] { color: #555e6b !important; }
+    [class~="text-[#666]"] { color: #5b6470 !important; }
+
+    /* ---- Placeholders ---- */
+    [class*="placeholder:text-white"]::placeholder { color: rgba(24, 26, 35, 0.45) !important; }
+
+    /* ---- Borders → hairline dark ---- */
+    [class*="border-white/"],
+    [class~="border-white"],
+    [class~="border-[#333]"] { border-color: var(--line) !important; }
+
+    /* ---- Subtle veils → subtle dark overlay ---- */
+    [class~="bg-white/5"],  [class~="hover:bg-white/5"]:hover  { background-color: rgba(20,20,30,0.045) !important; }
+    [class~="bg-white/10"], [class~="hover:bg-white/10"]:hover { background-color: rgba(20,20,30,0.07) !important; }
+    [class~="bg-white/20"], [class~="hover:bg-white/20"]:hover { background-color: rgba(20,20,30,0.11) !important; }
+
+    /* ---- Low-alpha black insets → light recess (high-alpha scrims stay dark) ---- */
+    [class~="bg-black/20"], [class~="bg-black/25"],
+    [class~="bg-black/30"], [class~="bg-black/40"] { background-color: rgba(20,20,30,0.05) !important; }
+
+    [class*="ring-white/"] { --tw-ring-color: rgba(28,28,40,0.14) !important; }
+
+    /* ---- Bright accent TEXT → readable-on-light variants ---- */
+    [class*="text-gold"]      { color: var(--gold-ink) !important; }
+    [class*="text-emerald-"]  { color: #047857 !important; }
+    [class*="text-green-"]    { color: #047857 !important; }
+    [class*="text-cyan-"]     { color: #0e7490 !important; }
+    [class*="text-sky-"]      { color: #0369a1 !important; }
+    [class*="text-blue-"]     { color: #1d4ed8 !important; }
+    [class*="text-indigo-"]   { color: #4f46e5 !important; }
+    [class*="text-purple-"]   { color: #6d28d9 !important; }
+    [class*="text-amber-"]    { color: #b45309 !important; }
+    [class*="text-rose-"]     { color: #be123c !important; }
+    [class*="text-yellow-"]   { color: #a16207 !important; }
+
+    /* Neutral light-grays → readable muted ink (e.g. dictionary example sentences) */
+    [class*="text-slate-"], [class*="text-gray-"], [class*="text-zinc-"],
+    [class*="text-neutral-"], [class*="text-stone-"] { color: var(--ink-muted) !important; }
+
+    /* ---- EXCEPTIONS — keep WHITE text on saturated/brand buttons ---- */
+    [class*="bg-crimson"][class~="text-white"],
+    [class~="bg-[#E31C25]"][class~="text-white"],
+    [class~="bg-[#ff1a1a]"][class~="text-white"],
+    [class~="bg-[#229ED9]"][class~="text-white"],
+    [class~="bg-[#1877F2]"][class~="text-white"],
+    [class~="bg-[#25D366]"][class~="text-white"],
+    [class~="bg-[#20ba56]"][class~="text-white"],
+    [class*="bg-emerald-5"][class~="text-white"],
+    [class*="bg-emerald-6"][class~="text-white"],
+    [class*="bg-green-5"][class~="text-white"],
+    [class*="bg-green-6"][class~="text-white"],
+    [class*="bg-blue-5"][class~="text-white"],
+    [class*="bg-blue-6"][class~="text-white"],
+    [class*="bg-rose-5"][class~="text-white"],
+    [class*="bg-purple-5"][class~="text-white"],
+    [class*="bg-indigo-5"][class~="text-white"],
+    [class*="from-crimson"][class~="text-white"],
+    [class*="to-crimson"][class~="text-white"],
+    [class*="from-gold"][class~="text-white"],
+    [class*="from-yellow"][class~="text-white"],
+    [class*="from-rose"][class~="text-white"],
+    [class*="from-pink"][class~="text-white"],
+    [class*="from-emerald"][class~="text-white"],
+    [class*="from-cyan"][class~="text-white"],
+    [class*="from-blue"][class~="text-white"],
+    [class*="from-purple"][class~="text-white"],
+    [class*="from-indigo"][class~="text-white"],
+    [class~="from-[#f9ce34]"][class~="text-white"] {
+      color: #ffffff !important;
+    }
+    [class~="bg-[#229ED9]"][class*="text-"],
+    [class~="bg-[#1877F2]"][class*="text-"],
+    [class~="bg-[#25D366]"][class*="text-"],
+    [class~="bg-[#20ba56]"][class*="text-"] { color: #ffffff !important; }
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 9999px;
+/* ============================================================================
+   SHARED INTERACTIONS — tactile feedback + gentle motion (both themes)
+   ============================================================================ */
+button {
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease, background-color 0.2s ease,
+              border-color 0.2s ease, color 0.2s ease;
+}
+button:not(:disabled):active { transform: translateY(1px) scale(0.985); }
+
+html.theme-light [class*="bg-crimson"]:not(:disabled):hover { box-shadow: 0 8px 20px -8px rgba(227, 28, 37, 0.55); }
+html.theme-light [class*="bg-gold"]:not(:disabled):hover,
+html.theme-light [class*="from-gold"]:not(:disabled):hover { box-shadow: 0 8px 20px -8px rgba(255, 184, 0, 0.6); }
+html.theme-light input:focus,
+html.theme-light textarea:focus,
+html.theme-light select:focus { box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }
+
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.animate-float { animation: floaty 3.5s ease-in-out infinite; }
+
+@keyframes sheen { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+.animate-sheen { background-size: 200% 200%; animation: sheen 12s ease-in-out infinite alternate; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #FFD700;
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fadeIn { animation: fadeIn 0.3s ease-out both; }
+.animate-slideDown { animation: slideDown 0.35s ease-out both; }
+.animate-spin-slow { animation: spin 4s linear infinite; }
 
-/* Custom animations referenced throughout components */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out both;
-}
-
-.animate-slideDown {
-  animation: slideDown 0.35s ease-out both;
-}
-
-.animate-spin-slow {
-  animation: spin 4s linear infinite;
-}
-
-/* Prevent iOS text size adjustment and touch callout */
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
-/* Ensure proper box sizing everywhere */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-/* Smooth scroll for iOS momentum */
-.scrollbar-thin {
-  -webkit-overflow-scrolling: touch;
-}
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+.scrollbar-thin { -webkit-overflow-scrolling: touch; }

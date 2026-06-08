@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Loghat logo">
+  <defs>
+    <linearGradient id="loghatBg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD93B"/>
+      <stop offset="0.5" stop-color="#FF9F1C"/>
+      <stop offset="1" stop-color="#E31C25"/>
+    </linearGradient>
+    <linearGradient id="loghatBubble" x1="13" y1="15" x2="51" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#fff6e9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle background: warm Malaysian gold → crimson -->
+  <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#loghatBg)"/>
+
+  <!-- Soft top-light sheen -->
+  <path d="M0 16 A16 16 0 0 1 16 0 H48 A16 16 0 0 1 64 16 V24 C44 12 20 12 0 24 Z" fill="#ffffff" opacity="0.14"/>
+
+  <!-- Chat bubble with a tail (chit-chat / dialects) -->
+  <path d="M16 16 H48 a8 8 0 0 1 8 8 V36 a8 8 0 0 1 -8 8 H28 l-7 7 v-7 h-5 a8 8 0 0 1 -8 -8 V24 a8 8 0 0 1 8 -8 Z"
+        fill="url(#loghatBubble)"/>
+
+  <!-- Three dialect dots in the brand palette -->
+  <circle cx="23" cy="30" r="3.4" fill="#E31C25"/>
+  <circle cx="32" cy="30" r="3.4" fill="#119DB8"/>
+  <circle cx="41" cy="30" r="3.4" fill="#F59E0B"/>
+</svg>

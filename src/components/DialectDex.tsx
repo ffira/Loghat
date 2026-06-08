@@ -321,7 +321,7 @@ export default function DialectDex({
 
   const visibleEntries = filteredEntries.slice(0, itemsToShow);
 
-  const dialectsTypes = ['All', 'Logat Utara', 'Kelantanese', 'Terengganu', 'Negeri Sembilan', 'Sabahan', 'Sarawakian', 'Manglish', 'Penang Hokkien', 'Johor', 'Perlis', 'Pahang', 'Kuala Lumpur', 'Melaka'];
+  const dialectsTypes = ['All', 'Logat Utara', 'Perak', 'Kelantanese', 'Terengganu', 'Negeri Sembilan', 'Sabahan', 'Sarawakian', 'Labuan', 'Manglish', 'Penang Hokkien', 'Johor', 'Perlis', 'Pahang', 'Kuala Lumpur', 'Melaka'];
   const contexts = ['All', 'Slang', 'Formal', 'Insult', 'Endearment'];
 
   const getContextBadgeColor = (context: ContextOfUse) => {
@@ -659,10 +659,12 @@ export default function DialectDex({
                     className="bg-interior border border-white/10 rounded-lg p-2 text-white focus:outline-none"
                   >
                     <option value="Logat Utara" className="bg-[#121212]">Logat Utara (Kedah/Penang/Perlis)</option>
+                    <option value="Perak" className="bg-[#121212]">Perak (Logat Perak)</option>
                     <option value="Kelantanese" className="bg-[#121212]">Kelantanese</option>
                     <option value="Terengganu" className="bg-[#121212]">Terengganu</option>
                     <option value="Sarawakian" className="bg-[#121212]">Sarawakian</option>
                     <option value="Sabahan" className="bg-[#121212]">Sabahan (Sabah)</option>
+                    <option value="Labuan" className="bg-[#121212]">Labuan (FT Labuan)</option>
                     <option value="Negeri Sembilan" className="bg-[#121212]">Negeri Sembilan</option>
                     <option value="Manglish" className="bg-[#121212]">Manglish (Malaysian Slang)</option>
                     <option value="Penang Hokkien" className="bg-[#121212]">Penang Hokkien</option>
@@ -682,6 +684,7 @@ export default function DialectDex({
                   >
                     <option value="Kedah" className="bg-[#121212]">Kedah</option>
                     <option value="Penang" className="bg-[#121212]">Penang</option>
+                    <option value="Perak" className="bg-[#121212]">Perak</option>
                     <option value="Perlis" className="bg-[#121212]">Perlis</option>
                     <option value="Kelantan" className="bg-[#121212]">Kelantan</option>
                     <option value="Terengganu" className="bg-[#121212]">Terengganu</option>
@@ -690,6 +693,7 @@ export default function DialectDex({
                     <option value="Negeri Sembilan" className="bg-[#121212]">Negeri Sembilan</option>
                     <option value="Sarawak" className="bg-[#121212]">Sarawak</option>
                     <option value="Sabah" className="bg-[#121212]">Sabah</option>
+                    <option value="Labuan" className="bg-[#121212]">Labuan</option>
                     <option value="Johor" className="bg-[#121212]">Johor</option>
                     <option value="Pahang" className="bg-[#121212]">Pahang</option>
                     <option value="Melaka" className="bg-[#121212]">Melaka</option>
